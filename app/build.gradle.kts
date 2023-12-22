@@ -27,12 +27,16 @@ android {
         }
     }
     compileOptions {
-
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_1_9
         targetCompatibility = JavaVersion.VERSION_1_9
     }
+
     kotlinOptions {
         jvmTarget = "9"
+    }
+    buildFeatures {
+        viewBinding = true
     }
 }
 
@@ -47,4 +51,7 @@ dependencies {
 
     // for web socket
     implementation("com.squareup.okhttp3:okhttp:4.11.0")
+
+    //for supporting java_8 features
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
 }
