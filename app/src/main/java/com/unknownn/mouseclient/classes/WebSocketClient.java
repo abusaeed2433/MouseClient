@@ -23,9 +23,11 @@ public class WebSocketClient {
     private static final String WEBSOCKET_URL = "http://localhost:8000";
     private WebSocket webSocket = null;
     private DataOutputStream outputStream = null;
+    private final SocketListener socketListener;
     ExecutorService service = Executors.newSingleThreadExecutor();
 
-    public WebSocketClient() {
+    public WebSocketClient(SocketListener socketListener){
+        this.socketListener = socketListener;
         createManualClient();
         //createClientObject();
     }
@@ -43,9 +45,10 @@ public class WebSocketClient {
 
                     Socket soc = new Socket(host, port);
 
-                    System.out.println("Websocket reading outputstream");
+                    System.out.println("Websocket reading output stream");
                     outputStream = new DataOutputStream(soc.getOutputStream());
                     System.out.println("Websocket ready to send data");
+                    socketListener.onConnected();
                     break;
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -70,6 +73,10 @@ public class WebSocketClient {
                 e.printStackTrace();
             }
         });
+    }
+
+    public interface SocketListener{
+        void onConnected();
     }
 
 }

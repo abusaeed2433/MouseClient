@@ -4,14 +4,26 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".MainActivity" >
 
-    <Button
-        android:id="@+id/tvHudai"
+    <ProgressBar
+        android:visibility="invisible"
+        android:id="@+id/progressBar"
         android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:elevation="7dp"
+        app:layout_constraintBottom_toBottomOf="@+id/buttonConnect"
+        app:layout_constraintEnd_toEndOf="@+id/buttonConnect"
+        app:layout_constraintStart_toStartOf="@+id/buttonConnect"
+        app:layout_constraintTop_toTopOf="@+id/buttonConnect" />
+
+    <android.widget.Button
+        android:id="@+id/buttonConnect"
+        android:layout_width="0dp"
         android:layout_height="50dp"
-        android:background="@color/black"
-        android:text="Hello World!"
+        app:layout_constraintWidth_percent="0.7"
+        android:background="@drawable/button_ripple"
+        android:text="@string/connect"
         android:textColor="@color/white"
         android:gravity="center"
         app:layout_constraintBottom_toBottomOf="parent"
