@@ -2,8 +2,11 @@ package com.unknownn.mouseclient.classes;
 
 import androidx.annotation.NonNull;
 
+import com.google.gson.Gson;
+
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
@@ -22,7 +25,7 @@ public class WebSocketClient {
     //private static final String WEBSOCKET_URL = "ws://localhost:8000";
     private static final String WEBSOCKET_URL = "http://localhost:8000";
     private WebSocket webSocket = null;
-    private DataOutputStream outputStream = null;
+    private ObjectOutputStream outputStream = null;
     private final SocketListener socketListener;
     ExecutorService service = Executors.newSingleThreadExecutor();
 
@@ -46,7 +49,7 @@ public class WebSocketClient {
                     Socket soc = new Socket(host, port);
 
                     System.out.println("Websocket reading output stream");
-                    outputStream = new DataOutputStream(soc.getOutputStream());
+                    outputStream = new ObjectOutputStream(soc.getOutputStream());
                     System.out.println("Websocket ready to send data");
                     socketListener.onConnected();
                     break;
@@ -61,14 +64,16 @@ public class WebSocketClient {
         service.shutdown();
     }
 
-    public void sendMessage(String message){
+    public void sendMessage(SharedCommand command){
         if(outputStream == null) return;
-
         service.execute(() -> {
             try {
-                System.out.println("Websocket trying to write");
-                outputStream.writeUTF(message);
-                System.out.println("Websocket Written");
+                Gson gson = new Gson();
+                String json = gson.toJson(command);
+
+                System.out.println("Sent data");
+                outputStream.writeUTF(json);
+                System.out.println("Sent data done");
             }catch (IOException e){
                 e.printStackTrace();
             }

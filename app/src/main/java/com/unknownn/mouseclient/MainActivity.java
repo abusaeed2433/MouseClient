@@ -14,7 +14,7 @@ import com.unknownn.mouseclient.databinding.ActivityMainBinding;
 public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding = null;
-    private WebSocketClient socketClient = null;
+    public static WebSocketClient socketClient = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,10 +37,6 @@ public class MainActivity extends AppCompatActivity {
         binding.buttonConnect.setText("");
         binding.progressBar.setVisibility(View.VISIBLE);
         startWebsocketClient();
-    }
-
-    private void sendData(String message){
-        socketClient.sendMessage(message);
     }
 
     private void startWebsocketClient(){

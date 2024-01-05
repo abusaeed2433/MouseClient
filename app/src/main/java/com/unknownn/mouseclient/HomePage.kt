@@ -5,6 +5,7 @@ import android.view.MenuItem
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.unknownn.mouseclient.classes.MyTouchPad
+import com.unknownn.mouseclient.classes.SharedCommand
 import com.unknownn.mouseclient.databinding.ActivityHomePageBinding
 
 class HomePage : AppCompatActivity() {
@@ -25,10 +26,16 @@ class HomePage : AppCompatActivity() {
         val touchPad = binding.myTouchPad
         touchPad.touchPadListener = object : MyTouchPad.TouchPadListener{
             override fun onMoveRequest(dx: Float, dy: Float) {
-
+                //println("Sent requested with $dx and $dy")
+                val command = SharedCommand(SharedCommand.Type.MOVE,dx,dy)
+                sendData(command)
             }
 
         }
+    }
+
+    private fun sendData(message: SharedCommand) {
+        MainActivity.socketClient.sendMessage(message)
     }
 
     private fun setBackListener(){

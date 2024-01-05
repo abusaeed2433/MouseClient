@@ -54,4 +54,6 @@ dependencies {
 
     //for supporting java_8 features
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
+
+    implementation("com.google.code.gson:gson:2.10.1")
 }

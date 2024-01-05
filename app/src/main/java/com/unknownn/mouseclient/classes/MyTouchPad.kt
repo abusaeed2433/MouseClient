@@ -14,6 +14,7 @@ import android.view.MotionEvent
 import android.view.View
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import kotlin.math.abs
 
 
 class MyTouchPad : View {
@@ -63,7 +64,7 @@ class MyTouchPad : View {
         service.execute{
             while (true) {
                 count = (count+1) % 4
-                Thread.sleep(50)
+                Thread.sleep(100)
 
                 if(prevPosition.first == 0f){
                     prevPosition = curPosition
@@ -73,7 +74,9 @@ class MyTouchPad : View {
                 val dx = curPosition.first - prevPosition.first
                 val dy = curPosition.second - prevPosition.second
 
-                if(dx < TOLERANCE_DISTANCE && dy < TOLERANCE_DISTANCE){
+                prevPosition = curPosition
+
+                if(abs(dx) < TOLERANCE_DISTANCE && abs(dy) < TOLERANCE_DISTANCE){
                     continue
                 }
 
@@ -91,9 +94,6 @@ class MyTouchPad : View {
                         }
                     }
                 }
-
-                count = (count+1) % 4
-                Thread.sleep(50)
             }
         }
         service.shutdown()
