@@ -4,13 +4,31 @@ import android.os.Bundle
 import android.view.MenuItem
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
+import com.unknownn.mouseclient.classes.MyTouchPad
+import com.unknownn.mouseclient.databinding.ActivityHomePageBinding
 
 class HomePage : AppCompatActivity() {
+
+    private lateinit var binding:ActivityHomePageBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_home_page)
 
+        binding = ActivityHomePageBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        setupTouchPad()
         setBackListener()
+
+    }
+
+    private fun setupTouchPad(){
+        val touchPad = binding.myTouchPad
+        touchPad.touchPadListener = object : MyTouchPad.TouchPadListener{
+            override fun onMoveRequest(dx: Float, dy: Float) {
+
+            }
+
+        }
     }
 
     private fun setBackListener(){
