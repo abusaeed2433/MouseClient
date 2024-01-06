@@ -31,18 +31,26 @@ class HomePage : AppCompatActivity() {
                 sendData(command)
             }
 
+            override fun onSingleClickRequest() {
+                val command = SharedCommand(SharedCommand.Type.SINGLE_CLICK)
+                sendData(command)
+            }
+
+            override fun onDoubleClickRequest() {
+                val command = SharedCommand(SharedCommand.Type.DOUBLE_CLICK)
+                sendData(command)
+            }
         }
     }
 
     private fun sendData(message: SharedCommand) {
-        MainActivity.socketClient.sendMessage(message)
+        MainActivity.socketClient?.sendMessage(message)
     }
 
     private fun setBackListener(){
         onBackPressedDispatcher.addCallback(this,object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 onBackPressedDispatcher.onBackPressed()
-                overrideActivityTransition(OVERRIDE_TRANSITION_CLOSE,android.R.anim.fade_in, android.R.anim.fade_out)
             }
         })
     }
@@ -50,7 +58,6 @@ class HomePage : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == android.R.id.home) {
             onBackPressedDispatcher.onBackPressed()
-            overrideActivityTransition(OVERRIDE_TRANSITION_CLOSE,android.R.anim.fade_in, android.R.anim.fade_out)
             return true
         }
         return super.onOptionsItemSelected(item)

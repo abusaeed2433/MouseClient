@@ -6,13 +6,11 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Path
-import android.graphics.Point
 import android.os.Handler
 import android.os.Looper
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import kotlin.math.abs
 
@@ -21,15 +19,20 @@ class MyTouchPad : View {
 
     companion object {
         private const val MAX_TIMEOUT = 200L // double of tap timeout
-        private const val PATH_TIMEOUT = 1200L
-        private const val TOLERANCE_DISTANCE = 12f
+        private const val SINGLE_CLICK_TIMEOUT = 150L
+        private const val TOLERANCE_DISTANCE = 3f // 12f was first used
         var staticMinLength = 12f
     }
+
+    private val service = Executors.newFixedThreadPool(2)
 
     private val currentPath = Path()
     private val paintBrush = Paint()
     private val mHandler = Handler(Looper.getMainLooper())
+
     private var lastDrawTime = 0L
+    private var lastDownTime = 0L
+    private var prevClickDownTime = 0L
 
     private var isFingerLifted = true
 
@@ -57,14 +60,28 @@ class MyTouchPad : View {
     }
 
     private fun initAll(){
-        val service = Executors.newSingleThreadExecutor()
+
 
         var count = 1
 
+        // mouse move
         service.execute{
             while (true) {
                 count = (count+1) % 4
                 Thread.sleep(100)
+
+                if(count % 4 == 0) {
+                    val timeSpent = System.currentTimeMillis() - lastDrawTime
+
+                    if (timeSpent > MAX_TIMEOUT && isFingerLifted) {
+                        mHandler.post {
+                            currentPath.reset()
+                            invalidate()
+                        }
+                    }
+                }
+
+                if(isFingerLifted) continue
 
                 if(prevPosition.first == 0f){
                     prevPosition = curPosition
@@ -83,19 +100,9 @@ class MyTouchPad : View {
                 mHandler.post {
                     touchPadListener?.onMoveRequest(dx, dy)
                 }
-
-                if(count % 4 == 0) {
-                    val timeSpent = System.currentTimeMillis() - lastDrawTime
-
-                    if (timeSpent > MAX_TIMEOUT && isFingerLifted) {
-                        mHandler.post {
-                            currentPath.reset()
-                            invalidate()
-                        }
-                    }
-                }
             }
         }
+
         service.shutdown()
     }
 
@@ -110,6 +117,7 @@ class MyTouchPad : View {
 
         return when (event.action) {
             MotionEvent.ACTION_DOWN -> {
+                lastDownTime = System.currentTimeMillis()
                 currentPath.reset()
                 currentPath.moveTo(x, y)
                 isFingerLifted = false
@@ -125,7 +133,9 @@ class MyTouchPad : View {
             MotionEvent.ACTION_UP -> {
                 currentPath.lineTo(x,y)
                 isFingerLifted = true
+                prevPosition = Pair(0f,0f)
                 invalidate()
+                checkForClick()
                 true
             }
 
@@ -136,6 +146,16 @@ class MyTouchPad : View {
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         canvas.drawPath(currentPath, paintBrush)
+    }
+
+    private fun checkForClick(){
+        val curTime = System.currentTimeMillis()
+
+        // not any click
+        if( (curTime - lastDownTime) > SINGLE_CLICK_TIMEOUT ) return
+
+        touchPadListener?.onSingleClickRequest()
+        prevClickDownTime = lastDownTime
     }
 
     private fun setBrushProperty() {
@@ -162,6 +182,8 @@ class MyTouchPad : View {
 
     interface TouchPadListener{
         fun onMoveRequest(dx:Float,dy:Float)
+        fun onSingleClickRequest()
+        fun onDoubleClickRequest()
     }
 
 }
