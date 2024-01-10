@@ -2,6 +2,7 @@ package com.unknownn.mouseclient.classes;
 
 import com.google.gson.Gson;
 
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
@@ -13,6 +14,8 @@ public class WebSocketClient {
     private final SocketListener socketListener;
     ExecutorService service = Executors.newSingleThreadExecutor();
 
+    private DataListener dataListener = null;
+
     public WebSocketClient(SocketListener socketListener){
         this.socketListener = socketListener;
         createManualClient();
@@ -23,6 +26,8 @@ public class WebSocketClient {
 
         ExecutorService service = Executors.newSingleThreadExecutor();
         service.execute(() -> {
+            DataInputStream dataInputStream = null;
+
             while (true) {
                 try {
                     String host = "192.168.0.104";
@@ -34,6 +39,9 @@ public class WebSocketClient {
 
                     System.out.println("Websocket reading output stream");
                     outputStream = new DataOutputStream(soc.getOutputStream());
+
+                    dataInputStream = new DataInputStream(soc.getInputStream());
+
                     System.out.println("Websocket ready to send data");
                     socketListener.onConnected();
                     break;
@@ -44,8 +52,24 @@ public class WebSocketClient {
                     }catch (InterruptedException ignored){}
                 }
             }
+
+            final Gson gson = new Gson();
+            while (true) {
+                try {
+                    String strCommand = dataInputStream.readUTF();
+                    SharedCommand command = gson.fromJson(strCommand, SharedCommand.class);
+                    if(dataListener != null) dataListener.onMessageReceived(command);
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+
         });
         service.shutdown();
+    }
+
+    public void setDataListener(DataListener dataListener) {
+        this.dataListener = dataListener;
     }
 
     public void sendMessage(SharedCommand command){

@@ -4,7 +4,7 @@ import java.io.Serializable
 
 class SharedCommand(val type:Type, vararg args:Float):Serializable {
 
-    private var points: Array<Float>
+    var points: Array<Float>
     init {
         points = args.toTypedArray()
     }
