@@ -19,11 +19,10 @@ class ScreenShareActivity : AppCompatActivity() {
 
         setListener()
 
-        /*
+
         Handler(Looper.getMainLooper()).postDelayed({
-            initImagePlotter(0f,0f)
+            initImagePlotter(1200f,720f)
         }, 2000)
-        */
     }
 
     private fun setListener(){
