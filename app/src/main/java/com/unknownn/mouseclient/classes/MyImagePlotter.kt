@@ -2,10 +2,12 @@ package com.unknownn.mouseclient.classes
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Path
+import android.graphics.RectF
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
@@ -21,6 +23,7 @@ class MyImagePlotter : View {
     private val redPaintBrush = Paint()
     private val greenPaintBrush = Paint()
     private val bluePaintBrush = Paint()
+    private val whitePaintBrush = Paint()
 
     private var boundaryWidth = 0f
     private var boundaryHeight = 0f
@@ -36,6 +39,11 @@ class MyImagePlotter : View {
     private val colorPixels = ArrayList<Char>()
 
     var plotListener : ImagePlotListener? = null
+
+    var isDrawingRequested = false
+    var isDrawn = false
+    private lateinit var fullRect:RectF
+    private var curBitmap:Bitmap? = null
 
     constructor(context: Context?) : super(context) {
         if (isInEditMode) return
@@ -67,29 +75,39 @@ class MyImagePlotter : View {
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
+
+        if( !isDrawingRequested ) return
+
         canvas.save()
         canvas.scale(scaleFactor, scaleFactor, myPivotX, myPivotY)
 
         canvas.drawPath(screenBoundary,redPaintBrush)
-        //canvas.drawPath(dummyPath,greenPaintBrush)
 
-        for(i in pathPixels.indices){
+        if(curBitmap != null) {
+            canvas.drawBitmap(curBitmap!!,null, fullRect,null);
+        }
+
+        /*for(i in pathPixels.indices){
             canvas.drawPath(
                 pathPixels[i],
                 if ( colorPixels[i] == 'R' ) redPaintBrush
                 else if ( colorPixels[i] == 'G' ) greenPaintBrush
-                else bluePaintBrush
+                else if ( colorPixels[i] == 'B' ) bluePaintBrush
+                else whitePaintBrush
             )
         }
 
-        canvas.restore()
+        canvas.restore()*/
+        isDrawn = true
+
+        isDrawingRequested = false
     }
 
     private fun initializeAll() {
 
         scaleGestureDetector = ScaleGestureDetector(context, ScaleListener())
 
-        val list = listOf(redPaintBrush,greenPaintBrush,bluePaintBrush)
+        val list = listOf(redPaintBrush,greenPaintBrush,bluePaintBrush,whitePaintBrush)
 
         for(paintBrush in list){
             paintBrush.isAntiAlias = true
@@ -102,6 +120,7 @@ class MyImagePlotter : View {
         redPaintBrush.color = Color.RED
         greenPaintBrush.color = Color.GREEN
         bluePaintBrush.color = Color.BLUE
+        whitePaintBrush.color = Color.WHITE
     }
 
     fun setImageResolution(widthPx:Int, heightPx:Int){
@@ -174,6 +193,7 @@ class MyImagePlotter : View {
 
         plotListener?.onMessageFound("Took $dif ms")
 
+        isDrawingRequested = true
         invalidate()
     }
 
@@ -189,17 +209,27 @@ class MyImagePlotter : View {
 
         screenBoundary.lineTo(widthPad,heightPad)
 
-        dummyPath.reset()
-        dummyPath.moveTo(10f,10f)
-        dummyPath.lineTo(200f,200f)
-        dummyPath.lineTo(200f,40f)
-        dummyPath.lineTo(50f,320f)
-
+        fullRect = RectF(widthPad,heightPad,width+widthPad,height+heightPad)
         invalidate()
     }
 
+    fun updateFrame(bitmap: Bitmap){
+        curBitmap = bitmap
+        isDrawingRequested = true
+        invalidate()
+    }
+    fun updateFrame(coloredPixel:Array<CharArray>){
+        for(i in 0 until imageWH.second){
+            val row = i * imageWH.first
+            for(j in 0 until imageWH.first) {
+                colorPixels[row + j] = coloredPixel[i][j]
+            }
+        }
+        isDrawingRequested = true
+        invalidate()
+    }
 
-    public interface ImagePlotListener{
+    interface ImagePlotListener{
         fun onMessageFound(message: String)
     }
 
@@ -228,6 +258,5 @@ class MyImagePlotter : View {
             return true
         }
     }
-
 
 }

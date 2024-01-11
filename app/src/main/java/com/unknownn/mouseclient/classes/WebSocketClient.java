@@ -2,10 +2,13 @@ package com.unknownn.mouseclient.classes;
 
 import com.google.gson.Gson;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.nio.ByteBuffer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -24,12 +27,11 @@ public class WebSocketClient {
         //createClientObject();
     }
 
+    private DataInputStream dataInputStream = null;
     private void createManualClient(){
 
-        ExecutorService service = Executors.newSingleThreadExecutor();
+        ExecutorService service = Executors.newFixedThreadPool(2);
         service.execute(() -> {
-            DataInputStream dataInputStream = null;
-
             while (true) {
                 try {
                     String host = "192.168.0.104";
@@ -57,14 +59,52 @@ public class WebSocketClient {
 
             while (true) {
                 try {
-                    String strCommand = dataInputStream.readUTF();
-                    interpretCommand(strCommand);
+                    /*String strCommand = dataInputStream.readUTF();
+                    interpretCommand(strCommand);*/
+
+                    int totalBytes = dataInputStream.readInt();
+
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    byte[] buffer = new byte[4096];
+                    int bytesRead;
+                    int bytesReceived = 0;
+
+                    while (bytesReceived < totalBytes) {
+                        int bytesLeft = totalBytes - bytesReceived;
+                        int toRead = Math.min(buffer.length, bytesLeft);
+
+                        bytesRead = dataInputStream.read(buffer, 0, toRead);
+                        if (bytesRead > 0) {
+                            baos.write(buffer, 0, bytesRead);
+                            bytesReceived += bytesRead;
+                        }
+                    }
+
+                    byte[] imageBytes = baos.toByteArray();
+                    screenShareListener.onCommandReceived(imageBytes);
                 }catch (Exception e){
                     e.printStackTrace();
                 }
             }
 
         });
+/*
+        service.execute(()->{
+            while (true) {
+                try {
+                    byte[] sizeAr = new byte[4];
+                    int hudai = dataInputStream.read(sizeAr);
+                    int size = ByteBuffer.wrap(sizeAr).asIntBuffer().get();
+
+                    byte[] imageAr = new byte[size];
+                    hudai = dataInputStream.read(imageAr);
+                    screenShareListener.onCommandReceived(imageAr);
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+        });*/
+
         service.shutdown();
     }
 
@@ -82,12 +122,7 @@ public class WebSocketClient {
 
     private void interpretCommand(String strCommand){
         SharedCommand command = gson.fromJson(strCommand, SharedCommand.class);
-        if(command.getType() == SharedCommand.Type.SCREEN_INFO){
-            if(screenShareListener != null) screenShareListener.onCommandReceived(command);
-        }
-        else {
-            if (dataListener != null) dataListener.onMessageReceived(command);
-        }
+        if (dataListener != null) dataListener.onMessageReceived(command);
     }
 
     public void sendMessage(SharedCommand command){

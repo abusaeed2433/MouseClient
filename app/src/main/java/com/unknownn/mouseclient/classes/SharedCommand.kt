@@ -2,7 +2,13 @@ package com.unknownn.mouseclient.classes
 
 import java.io.Serializable
 
-class SharedCommand(val type:Type, vararg args:Float):Serializable {
+class SharedCommand(val type:Type, vararg args:Float): Serializable {
+
+    var byteArrayOfImage:ByteArray? = null
+
+    constructor(byteArrayOfImage:ByteArray):this(Type.SCREEN_SHOT){
+        this.byteArrayOfImage = byteArrayOfImage
+    }
 
     var points: Array<Float>
     init {
@@ -16,6 +22,7 @@ class SharedCommand(val type:Type, vararg args:Float):Serializable {
         SCROLL, // dx, dy
         CLICK_AND_SCROLL, // dx, dy
         SCREEN_INFO,
-        SCREEN_INFO_REQUEST
+        SCREEN_INFO_REQUEST,
+        SCREEN_SHOT
     }
 }

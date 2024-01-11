@@ -1,6 +1,6 @@
 package com.unknownn.mouseclient
 
-import android.media.Image
+import android.graphics.BitmapFactory
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
@@ -31,9 +31,9 @@ class ScreenShareActivity : AppCompatActivity() {
         val mHandler = Handler(Looper.getMainLooper())
 
         MainActivity.socketClient?.setScreenShareListener(object : ScreenShareListener{
-            override fun onCommandReceived(command: SharedCommand) {
+            override fun onCommandReceived(byteArray: ByteArray) {
                 mHandler.post{
-                    initImagePlotter(command.points[0],command.points[1])
+                    updateFrame(byteArray)
                 }
             }
         })
@@ -41,7 +41,7 @@ class ScreenShareActivity : AppCompatActivity() {
     }
 
     private fun initImagePlotter(width:Float, height:Float){
-        binding.myImagePlotter.setImageResolution(180,160)
+        binding.myImagePlotter.setImageResolution(80,60)
 
         binding.myImagePlotter.plotListener = object : MyImagePlotter.ImagePlotListener{
             override fun onMessageFound(message: String) {
@@ -53,6 +53,12 @@ class ScreenShareActivity : AppCompatActivity() {
             width - 0.1f*width,
             height - 0.1f*height
         )
+    }
+
+    private fun updateFrame(imageBytes:ByteArray){
+        val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+        showSafeToast(this,"Image received")
+        binding.myImagePlotter.updateFrame(bitmap)
     }
 
 }

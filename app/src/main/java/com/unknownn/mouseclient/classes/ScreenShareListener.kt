@@ -1,5 +1,5 @@
 package com.unknownn.mouseclient.classes
 
 interface ScreenShareListener {
-    fun onCommandReceived(command: SharedCommand)
+    fun onCommandReceived(byteArray:ByteArray)
 }
