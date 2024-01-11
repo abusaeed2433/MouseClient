@@ -22,9 +22,9 @@ class ScreenShareActivity : AppCompatActivity() {
 
         setListener()
 
-        Handler(Looper.getMainLooper()).postDelayed({
+/*        Handler(Looper.getMainLooper()).postDelayed({
             initImagePlotter(1200f,720f)
-        }, 2000)
+        }, 2000)*/
     }
 
     private fun setListener(){
@@ -35,6 +35,10 @@ class ScreenShareActivity : AppCompatActivity() {
                 mHandler.post{
                     updateFrame(byteArray)
                 }
+            }
+
+            override fun onScreenSizeReceived(width: Int, height: Int) {
+                initImagePlotter(width.toFloat(),height.toFloat())
             }
         })
         MainActivity.socketClient?.requestScreenInfo()

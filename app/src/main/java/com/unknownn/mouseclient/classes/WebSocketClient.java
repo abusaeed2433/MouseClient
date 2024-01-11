@@ -13,6 +13,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class WebSocketClient {
+
     private DataOutputStream outputStream = null;
     private final SocketListener socketListener;
     private final ExecutorService service = Executors.newSingleThreadExecutor();
@@ -57,53 +58,43 @@ public class WebSocketClient {
                 }
             }
 
+            int screenShareID = -1357; // Don't change here, change in desktop also
             while (true) {
                 try {
-                    /*String strCommand = dataInputStream.readUTF();
-                    interpretCommand(strCommand);*/
+                    int totalBytesOrId = dataInputStream.readInt();
 
-                    int totalBytes = dataInputStream.readInt();
-
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    byte[] buffer = new byte[4096];
-                    int bytesRead;
-                    int bytesReceived = 0;
-
-                    while (bytesReceived < totalBytes) {
-                        int bytesLeft = totalBytes - bytesReceived;
-                        int toRead = Math.min(buffer.length, bytesLeft);
-
-                        bytesRead = dataInputStream.read(buffer, 0, toRead);
-                        if (bytesRead > 0) {
-                            baos.write(buffer, 0, bytesRead);
-                            bytesReceived += bytesRead;
-                        }
+                    if(totalBytesOrId == screenShareID){
+                        int width = dataInputStream.readInt();
+                        int height = dataInputStream.readInt();
+                        screenShareListener.onScreenSizeReceived(width,height);
                     }
+                    else {
 
-                    byte[] imageBytes = baos.toByteArray();
-                    screenShareListener.onCommandReceived(imageBytes);
+                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                        byte[] buffer = new byte[4096];
+                        int bytesRead;
+                        int bytesReceived = 0;
+
+                        while (bytesReceived < totalBytesOrId) {
+                            int bytesLeft = totalBytesOrId - bytesReceived;
+                            int toRead = Math.min(buffer.length, bytesLeft);
+
+                            bytesRead = dataInputStream.read(buffer, 0, toRead);
+                            if (bytesRead > 0) {
+                                baos.write(buffer, 0, bytesRead);
+                                bytesReceived += bytesRead;
+                            }
+                        }
+
+                        byte[] imageBytes = baos.toByteArray();
+                        screenShareListener.onCommandReceived(imageBytes);
+                    }
                 }catch (Exception e){
                     e.printStackTrace();
                 }
             }
 
         });
-/*
-        service.execute(()->{
-            while (true) {
-                try {
-                    byte[] sizeAr = new byte[4];
-                    int hudai = dataInputStream.read(sizeAr);
-                    int size = ByteBuffer.wrap(sizeAr).asIntBuffer().get();
-
-                    byte[] imageAr = new byte[size];
-                    hudai = dataInputStream.read(imageAr);
-                    screenShareListener.onCommandReceived(imageAr);
-                }catch (Exception e){
-                    e.printStackTrace();
-                }
-            }
-        });*/
 
         service.shutdown();
     }
