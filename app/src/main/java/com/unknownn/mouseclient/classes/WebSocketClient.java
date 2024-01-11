@@ -12,9 +12,11 @@ import java.util.concurrent.Executors;
 public class WebSocketClient {
     private DataOutputStream outputStream = null;
     private final SocketListener socketListener;
-    ExecutorService service = Executors.newSingleThreadExecutor();
+    private final ExecutorService service = Executors.newSingleThreadExecutor();
+    private final Gson gson = new Gson();
 
     private DataListener dataListener = null;
+    private ScreenShareListener screenShareListener = null;
 
     public WebSocketClient(SocketListener socketListener){
         this.socketListener = socketListener;
@@ -53,12 +55,10 @@ public class WebSocketClient {
                 }
             }
 
-            final Gson gson = new Gson();
             while (true) {
                 try {
                     String strCommand = dataInputStream.readUTF();
-                    SharedCommand command = gson.fromJson(strCommand, SharedCommand.class);
-                    if(dataListener != null) dataListener.onMessageReceived(command);
+                    interpretCommand(strCommand);
                 }catch (Exception e){
                     e.printStackTrace();
                 }
@@ -70,6 +70,24 @@ public class WebSocketClient {
 
     public void setDataListener(DataListener dataListener) {
         this.dataListener = dataListener;
+    }
+    public void setScreenShareListener(ScreenShareListener shareListener){
+        this.screenShareListener = shareListener;
+    }
+
+    public void requestScreenInfo(){
+        SharedCommand command = new SharedCommand(SharedCommand.Type.SCREEN_INFO_REQUEST);
+        sendMessage(command);
+    }
+
+    private void interpretCommand(String strCommand){
+        SharedCommand command = gson.fromJson(strCommand, SharedCommand.class);
+        if(command.getType() == SharedCommand.Type.SCREEN_INFO){
+            if(screenShareListener != null) screenShareListener.onCommandReceived(command);
+        }
+        else {
+            if (dataListener != null) dataListener.onMessageReceived(command);
+        }
     }
 
     public void sendMessage(SharedCommand command){

@@ -2,6 +2,7 @@ package com.unknownn.mouseclient
 
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.view.MenuItem
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
@@ -44,12 +45,9 @@ class HomePage : AppCompatActivity() {
             }
         }
 
-        val mHandler = Handler()
         MainActivity.socketClient?.setDataListener(object: DataListener{
             override fun onMessageReceived(command: SharedCommand) {
-                mHandler.post {
-                    binding.tvHudai.setText("Points: ${command.points[0]}")
-                }
+
             }
         })
     }
