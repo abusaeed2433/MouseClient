@@ -6,14 +6,24 @@ import android.os.Handler
 import android.os.Looper
 import com.unknownn.mouseclient.classes.ScreenShareListener
 import com.unknownn.mouseclient.classes.SharedCommand
+import com.unknownn.mouseclient.databinding.ActivityScreenShareBinding
 
 class ScreenShareActivity : AppCompatActivity() {
 
+    private lateinit var binding: ActivityScreenShareBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_screen_share)
+        binding = ActivityScreenShareBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         setListener()
+
+        /*
+        Handler(Looper.getMainLooper()).postDelayed({
+            initImagePlotter(0f,0f)
+        }, 2000)
+        */
     }
 
     private fun setListener(){
@@ -30,7 +40,10 @@ class ScreenShareActivity : AppCompatActivity() {
     }
 
     private fun initImagePlotter(width:Float, height:Float){
-
+        binding.myImagePlotter.setScreenInfo(
+            width - 0.1f*width,
+            height - 0.1f*height
+        )
     }
 
 }

@@ -1,8 +1,8 @@
 package com.unknownn.mouseclient
 
+import android.R
+import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.MenuItem
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
@@ -21,7 +21,7 @@ class HomePage : AppCompatActivity() {
         setContentView(binding.root)
 
         setupTouchPad()
-        setBackListener()
+        setClickListener()
 
     }
 
@@ -56,7 +56,13 @@ class HomePage : AppCompatActivity() {
         MainActivity.socketClient?.sendMessage(message)
     }
 
-    private fun setBackListener(){
+    private fun setClickListener(){
+        
+        binding.ivScreenShare.setOnClickListener{
+            startActivity(Intent(this@HomePage, ScreenShareActivity::class.java))
+            overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
+        }
+
         onBackPressedDispatcher.addCallback(this,object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 onBackPressedDispatcher.onBackPressed()
