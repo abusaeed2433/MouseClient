@@ -1,11 +1,14 @@
 package com.unknownn.mouseclient
 
+import android.media.Image
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import com.unknownn.mouseclient.classes.MyImagePlotter
 import com.unknownn.mouseclient.classes.ScreenShareListener
 import com.unknownn.mouseclient.classes.SharedCommand
+import com.unknownn.mouseclient.classes.showSafeToast
 import com.unknownn.mouseclient.databinding.ActivityScreenShareBinding
 
 class ScreenShareActivity : AppCompatActivity() {
@@ -18,7 +21,6 @@ class ScreenShareActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setListener()
-
 
         Handler(Looper.getMainLooper()).postDelayed({
             initImagePlotter(1200f,720f)
@@ -39,6 +41,14 @@ class ScreenShareActivity : AppCompatActivity() {
     }
 
     private fun initImagePlotter(width:Float, height:Float){
+        binding.myImagePlotter.setImageResolution(180,160)
+
+        binding.myImagePlotter.plotListener = object : MyImagePlotter.ImagePlotListener{
+            override fun onMessageFound(message: String) {
+                showSafeToast(this@ScreenShareActivity,message)
+            }
+        }
+
         binding.myImagePlotter.setScreenInfo(
             width - 0.1f*width,
             height - 0.1f*height

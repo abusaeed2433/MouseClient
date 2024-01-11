@@ -27,8 +27,15 @@ class MyImagePlotter : View {
     private var widthPad = 0f
     private var heightPad = 0f
 
+    private var imageWH = Pair(0,0)
+
     private val screenBoundary = Path()
     private val dummyPath = Path()
+    
+    private val pathPixels = ArrayList<Path>()
+    private val colorPixels = ArrayList<Char>()
+
+    var plotListener : ImagePlotListener? = null
 
     constructor(context: Context?) : super(context) {
         if (isInEditMode) return
@@ -64,7 +71,16 @@ class MyImagePlotter : View {
         canvas.scale(scaleFactor, scaleFactor, myPivotX, myPivotY)
 
         canvas.drawPath(screenBoundary,redPaintBrush)
-        canvas.drawPath(dummyPath,greenPaintBrush)
+        //canvas.drawPath(dummyPath,greenPaintBrush)
+
+        for(i in pathPixels.indices){
+            canvas.drawPath(
+                pathPixels[i],
+                if ( colorPixels[i] == 'R' ) redPaintBrush
+                else if ( colorPixels[i] == 'G' ) greenPaintBrush
+                else bluePaintBrush
+            )
+        }
 
         canvas.restore()
     }
@@ -77,7 +93,7 @@ class MyImagePlotter : View {
 
         for(paintBrush in list){
             paintBrush.isAntiAlias = true
-            paintBrush.style = Paint.Style.STROKE
+            paintBrush.style = Paint.Style.FILL
             paintBrush.strokeCap = Paint.Cap.ROUND
             paintBrush.strokeJoin = Paint.Join.ROUND
             paintBrush.strokeWidth = 8f
@@ -86,6 +102,10 @@ class MyImagePlotter : View {
         redPaintBrush.color = Color.RED
         greenPaintBrush.color = Color.GREEN
         bluePaintBrush.color = Color.BLUE
+    }
+
+    fun setImageResolution(widthPx:Int, heightPx:Int){
+        this.imageWH = Pair(widthPx,heightPx)
     }
 
     fun setScreenInfo(width:Float, height:Float) {
@@ -110,6 +130,51 @@ class MyImagePlotter : View {
         heightPad = ( curHeight - this.boundaryHeight + heightExcluded) / 2
 
         updateBoundary(this.boundaryWidth,this.boundaryHeight)
+
+        drawPixel()
+    }
+
+    private fun drawPixel(){
+        val startTime = System.currentTimeMillis()
+
+        val pxWidth = this.boundaryWidth / imageWH.first
+        val pxHeight = this.boundaryHeight / imageWH.second
+
+        pathPixels.clear()
+        colorPixels.clear()
+
+        for(i in 0 until imageWH.second){
+            for(j in 0 until imageWH.first) {
+                
+                val topX = widthPad + (j * pxWidth)
+                val topY = heightPad + (i * pxHeight)
+                
+                val path = Path()
+                
+                path.moveTo(topX,topY) // top left
+                
+                path.lineTo(topX+pxWidth,topY) // top right
+                path.lineTo(topX+pxWidth,topY + pxHeight) // bottom right
+                path.lineTo(topX,topY+pxHeight) // bottom left
+
+                path.lineTo(topX,topY) // top left
+
+                pathPixels.add(path)
+                colorPixels.add(
+                    if ( (i+j) % 3 == 0) 'R'
+                    else if ( (i+j) % 3 == 1) 'G'
+                    else 'B'
+                )
+            }
+        }
+
+        val endTime = System.currentTimeMillis()
+
+        val dif = (endTime - startTime)
+
+        plotListener?.onMessageFound("Took $dif ms")
+
+        invalidate()
     }
 
     private fun updateBoundary(width: Float, height: Float){
@@ -131,6 +196,11 @@ class MyImagePlotter : View {
         dummyPath.lineTo(50f,320f)
 
         invalidate()
+    }
+
+
+    public interface ImagePlotListener{
+        fun onMessageFound(message: String)
     }
 
     private var scaleFactor = 1f
