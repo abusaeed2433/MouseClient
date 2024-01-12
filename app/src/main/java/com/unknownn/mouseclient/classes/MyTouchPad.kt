@@ -13,6 +13,7 @@ import android.view.MotionEvent
 import android.view.View
 import java.util.concurrent.Executors
 import kotlin.math.abs
+import kotlin.math.min
 
 
 class MyTouchPad : View {
@@ -20,7 +21,8 @@ class MyTouchPad : View {
     companion object {
         private const val MAX_TIMEOUT = 200L // double of tap timeout
         private const val SINGLE_CLICK_TIMEOUT = 150L
-        private const val TOLERANCE_DISTANCE = 3f // 12f was first used
+        private const val TOLERANCE_DISTANCE = 2f // 12f was first used
+        private const val COMMAND_SEND_INTERVAL = 40L
         var staticMinLength = 12f
     }
 
@@ -28,6 +30,8 @@ class MyTouchPad : View {
 
     private val currentPath = Path()
     private val paintBrush = Paint()
+    private val separatorBrush = Paint()
+    private val scrollBrush = Paint()
     private val mHandler = Handler(Looper.getMainLooper())
 
     private var lastDrawTime = 0L
@@ -40,6 +44,11 @@ class MyTouchPad : View {
     private var curPosition = Pair(0f,0f)
 
     var touchPadListener:TouchPadListener? = null
+
+    private val separatorPath = Path()
+    private val scrollPath = Path()
+
+    private var isInScrollArea = false
 
     constructor(context: Context?) : super(context) {
         if (isInEditMode) return
@@ -63,12 +72,13 @@ class MyTouchPad : View {
 
 
         var count = 1
+        var isSecondTime = false
 
         // mouse move
         service.execute{
             while (true) {
                 count = (count+1) % 4
-                Thread.sleep(100)
+                Thread.sleep(COMMAND_SEND_INTERVAL)
 
                 if(count % 4 == 0) {
                     val timeSpent = System.currentTimeMillis() - lastDrawTime
@@ -88,8 +98,8 @@ class MyTouchPad : View {
                     continue
                 }
 
-                val dx = curPosition.first - prevPosition.first
-                val dy = curPosition.second - prevPosition.second
+                val dx = (curPosition.first - prevPosition.first) * widthMultiplier
+                val dy = (curPosition.second - prevPosition.second) * heightMultiplier
 
                 prevPosition = curPosition
 
@@ -98,13 +108,26 @@ class MyTouchPad : View {
                 }
 
                 mHandler.post {
-                    touchPadListener?.onMoveRequest(dx, dy)
+                    if(isInScrollArea){
+                        setupScrollPath(dy)
+                        if(isSecondTime) {
+                            isSecondTime = false
+                            touchPadListener?.onScrollRequest(dy)
+                        }
+                        else{
+                            isSecondTime = true
+                        }
+                    }
+                    else {
+                        touchPadListener?.onMoveRequest(dx, dy)
+                    }
                 }
             }
         }
 
         service.shutdown()
     }
+
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
@@ -119,19 +142,29 @@ class MyTouchPad : View {
             MotionEvent.ACTION_DOWN -> {
                 lastDownTime = System.currentTimeMillis()
                 currentPath.reset()
-                currentPath.moveTo(x, y)
+                if(x <= widthToUse) {
+                    isInScrollArea = false
+                    currentPath.moveTo(x, y)
+                }
+                else{
+                    isInScrollArea = true
+                }
                 isFingerLifted = false
                 true
             }
 
             MotionEvent.ACTION_MOVE -> {
-                currentPath.lineTo(x, y)
+                if(x <= widthToUse && !isInScrollArea) {
+                    currentPath.lineTo(x, y)
+                }
                 invalidate()
                 true
             }
 
             MotionEvent.ACTION_UP -> {
-                currentPath.lineTo(x,y)
+                if(x <= widthToUse && !isInScrollArea) {
+                    currentPath.lineTo(x, y)
+                }
                 isFingerLifted = true
                 prevPosition = Pair(0f,0f)
                 invalidate()
@@ -146,6 +179,8 @@ class MyTouchPad : View {
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         canvas.drawPath(currentPath, paintBrush)
+        canvas.drawPath(separatorPath,separatorBrush)
+        canvas.drawPath(scrollPath,scrollBrush)
     }
 
     private fun checkForClick(){
@@ -159,12 +194,22 @@ class MyTouchPad : View {
     }
 
     private fun setBrushProperty() {
-        paintBrush.isAntiAlias = true
-        paintBrush.color = Color.BLACK
-        paintBrush.style = Paint.Style.STROKE
-        paintBrush.strokeCap = Paint.Cap.ROUND
-        paintBrush.strokeJoin = Paint.Join.ROUND
-        paintBrush.strokeWidth = 8f
+
+        val list = listOf(paintBrush,separatorBrush, scrollBrush)
+
+        for(brush in list) {
+            brush.isAntiAlias = true
+            brush.color = Color.BLACK
+            brush.style = Paint.Style.STROKE
+            brush.strokeCap = Paint.Cap.ROUND
+            brush.strokeJoin = Paint.Join.ROUND
+            brush.strokeWidth = 8f
+        }
+        separatorBrush.color = Color.RED
+        separatorBrush.strokeWidth = 4f
+
+        scrollBrush.strokeWidth = 2f
+        scrollBrush.color = Color.GRAY
     }
 
     fun setColor(color: Int) {
@@ -180,11 +225,56 @@ class MyTouchPad : View {
     }
 
 
+    private var widthMultiplier = 1f
+    private var heightMultiplier = 1f
+    private var widthToUse = width * 0.8f
+    fun setScreenInfo(serverWidth:Float, serverHeight:Float) {
+        post {
+            widthToUse = width * 0.8f
+            val heightToUse = height * 0.95f
+
+            widthMultiplier = serverWidth / widthToUse
+            heightMultiplier = serverHeight / heightToUse
+
+            val heightPad = (height - heightToUse) / 2f
+
+            // separator path
+            separatorPath.moveTo(widthToUse, heightPad)
+            separatorPath.lineTo(widthToUse, heightToUse + heightPad)
+            setupScrollPath ()
+        }
+    }
+
+    private fun setupScrollPath(dy:Float = 0f){
+
+        scrollPath.reset()
+        val percent = 6f // 6%
+        val scrollBarWidth = width * (percent/100f)
+        val x = width * ( 0.80f + (20-percent)/200)
+
+        scrollPath.moveTo(x,0f)
+        scrollPath.lineTo(x,width.toFloat())
+
+        scrollPath.moveTo(x+scrollBarWidth,width.toFloat())
+        scrollPath.lineTo(x+scrollBarWidth,0f)
+
+        val noOfLines = 50
+        val lineGap = width / noOfLines.toFloat()
+
+        val lineGapServer = lineGap * heightMultiplier
+        val offset = min(dy, lineGapServer)
+
+        for(i in 0 until noOfLines){
+            scrollPath.moveTo(x,(lineGap * i)+offset)
+            scrollPath.lineTo(x+scrollBarWidth,(lineGap * i)+offset)
+        }
+    }
+
     interface TouchPadListener{
         fun onMoveRequest(dx:Float,dy:Float)
+        fun onScrollRequest(dy:Float)
         fun onSingleClickRequest()
         fun onDoubleClickRequest()
     }
 
 }
-

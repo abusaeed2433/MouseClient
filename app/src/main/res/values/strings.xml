@@ -4,4 +4,6 @@
     <string name="screen_share">Screen Share</string>
     <string name="fps_dash">FPS:--</string>
     <string name="fps_ph">FPS:%$lf</string>
+    <string name="action_type_values">action_type, values</string>
+    <string name="action_type_values_ph">%1$s %2$f &amp; %3$f</string>
 </resources>

@@ -105,6 +105,9 @@ public class WebSocketClient {
     public void setScreenShareListener(ScreenShareListener shareListener){
         this.screenShareListener = shareListener;
     }
+    public void clearScreenShareListener(){
+        this.screenShareListener = null;
+    }
 
     public void requestScreenInfo(){
         SharedCommand command = new SharedCommand(SharedCommand.Type.SCREEN_INFO_REQUEST);
@@ -145,5 +148,4 @@ public class WebSocketClient {
     public interface SocketListener{
         void onConnected();
     }
-
 }

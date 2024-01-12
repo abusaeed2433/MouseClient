@@ -42,7 +42,7 @@ class MyImagePlotter : View {
 
     var isDrawingRequested = false
     var isDrawn = false
-    private lateinit var fullRect:RectF
+    private var fullRect:RectF? = null
     private var curBitmap:Bitmap? = null
 
     constructor(context: Context?) : super(context) {
@@ -83,8 +83,8 @@ class MyImagePlotter : View {
 
         canvas.drawPath(screenBoundary,greenPaintBrush)
 
-        if(curBitmap != null) {
-            canvas.drawBitmap(curBitmap!!,null, fullRect,null);
+        if(curBitmap != null && fullRect != null) {
+            canvas.drawBitmap(curBitmap!!,null, fullRect!!,null);
         }
 
         /*for(i in pathPixels.indices){
