@@ -2,4 +2,6 @@
     <string name="app_name">MouseClient</string>
     <string name="connect">Connect</string>
     <string name="screen_share">Screen Share</string>
+    <string name="fps_dash">FPS:--</string>
+    <string name="fps_ph">FPS:%$lf</string>
 </resources>

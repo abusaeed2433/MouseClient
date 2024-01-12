@@ -76,12 +76,12 @@ class MyImagePlotter : View {
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
-        if( !isDrawingRequested ) return
+//        if( !isDrawingRequested ) return
 
         canvas.save()
         canvas.scale(scaleFactor, scaleFactor, myPivotX, myPivotY)
 
-        canvas.drawPath(screenBoundary,redPaintBrush)
+        canvas.drawPath(screenBoundary,greenPaintBrush)
 
         if(curBitmap != null) {
             canvas.drawBitmap(curBitmap!!,null, fullRect,null);
@@ -98,9 +98,9 @@ class MyImagePlotter : View {
         }
 
         canvas.restore()*/
-        isDrawn = true
 
-        isDrawingRequested = false
+  /*      isDrawn = true
+        isDrawingRequested = false*/
     }
 
     private fun initializeAll() {
@@ -214,10 +214,17 @@ class MyImagePlotter : View {
     }
 
     fun updateFrame(bitmap: Bitmap){
+        if(scalingInProgress) {
+            bitmap.recycle()
+            return
+        }
+
+        curBitmap?.recycle()
         curBitmap = bitmap
         isDrawingRequested = true
         invalidate()
     }
+
     fun updateFrame(coloredPixel:Array<CharArray>){
         for(i in 0 until imageWH.second){
             val row = i * imageWH.first

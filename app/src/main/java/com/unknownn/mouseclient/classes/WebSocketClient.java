@@ -111,6 +111,16 @@ public class WebSocketClient {
         sendMessage(command);
     }
 
+    public void requestScreenShare(){
+        SharedCommand command = new SharedCommand(SharedCommand.Type.SCREEN_SHARE_START_REQUEST);
+        sendMessage(command);
+    }
+
+    public void stopScreenShare(){
+        SharedCommand command = new SharedCommand(SharedCommand.Type.SCREEN_SHARE_STOP_REQUEST);
+        sendMessage(command);
+    }
+
     private void interpretCommand(String strCommand){
         SharedCommand command = gson.fromJson(strCommand, SharedCommand.class);
         if (dataListener != null) dataListener.onMessageReceived(command);

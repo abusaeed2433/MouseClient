@@ -6,10 +6,6 @@ class SharedCommand(val type:Type, vararg args:Float): Serializable {
 
     var byteArrayOfImage:ByteArray? = null
 
-    constructor(byteArrayOfImage:ByteArray):this(Type.SCREEN_SHOT){
-        this.byteArrayOfImage = byteArrayOfImage
-    }
-
     var points: Array<Float>
     init {
         points = args.toTypedArray()
@@ -23,6 +19,7 @@ class SharedCommand(val type:Type, vararg args:Float): Serializable {
         CLICK_AND_SCROLL, // dx, dy
         SCREEN_INFO,
         SCREEN_INFO_REQUEST,
-        SCREEN_SHOT
+        SCREEN_SHARE_START_REQUEST,
+        SCREEN_SHARE_STOP_REQUEST
     }
 }
