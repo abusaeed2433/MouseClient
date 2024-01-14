@@ -1,5 +1,6 @@
 package com.unknownn.mouseclient
 
+import android.R.fraction
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
@@ -142,15 +143,25 @@ class ScreenShareActivity : AppCompatActivity() {
 
                 val interpolatedPixels = IntArray(width * height)
 
+                fun lerp(startValue:Int, endValue:Int, fraction:Float):Int {
+                    return (startValue + fraction * (endValue - startValue)).toInt()
+                }
+
+                val fraction = 0.75f
                 fun getIntermediateFrame(alpha:Float):Bitmap {
                     val started = System.currentTimeMillis()
 
                     for (i in pixels1.indices) {
                         val color1 = pixels1[i]
                         val color2 = pixels2[i]
-                        val red = ((1 - alpha) * Color.red(color1) + alpha * Color.red(color2)).toInt()
+
+                        val red: Int = lerp(Color.red(color1), Color.red(color2), fraction)
+                        val green: Int = lerp(Color.green(color1), Color.green(color2), fraction)
+                        val blue: Int = lerp(Color.blue(color1), Color.blue(color2), fraction)
+
+                        /*val red = ((1 - alpha) * Color.red(color1) + alpha * Color.red(color2)).toInt()
                         val green = ((1 - alpha) * Color.green(color1) + alpha * Color.green(color2)).toInt()
-                        val blue = ((1 - alpha) * Color.blue(color1) + alpha * Color.blue(color2)).toInt()
+                        val blue = ((1 - alpha) * Color.blue(color1) + alpha * Color.blue(color2)).toInt()*/
                         interpolatedPixels[i] = Color.rgb(red, green, blue)
                     }
 
