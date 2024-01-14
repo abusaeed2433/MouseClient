@@ -17,6 +17,17 @@
         app:layout_constraintStart_toStartOf="@+id/buttonConnect"
         app:layout_constraintTop_toTopOf="@+id/buttonConnect" />
 
+    <EditText
+        android:id="@+id/editTextIP"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="@string/_192_168_0_104"
+        app:layout_constraintBottom_toTopOf="@+id/progressBar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintWidth_percent="0.8" />
+
     <android.widget.Button
         android:id="@+id/buttonConnect"
         android:layout_width="0dp"

@@ -22,10 +22,18 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        binding.buttonConnect.setOnClickListener(view -> connect());
+        setClickListener();
     }
 
-    private void connect(){
+
+    private void setClickListener(){
+        binding.buttonConnect.setOnClickListener(view -> {
+            String ip = binding.editTextIP.getText().toString().trim();
+            connect(ip);
+        });
+    }
+
+    private void connect(String ip){
 
         String text = binding.buttonConnect.getText().toString().trim();
 
@@ -36,15 +44,23 @@ public class MainActivity extends AppCompatActivity {
 
         binding.buttonConnect.setText("");
         binding.progressBar.setVisibility(View.VISIBLE);
-        startWebsocketClient();
+        startWebsocketClient(ip);
     }
 
-    private void startWebsocketClient(){
+    private void startWebsocketClient(String ip){
         if(socketClient == null){
-            socketClient = new WebSocketClient(() -> {
-                startActivity(new Intent(MainActivity.this,HomePage.class));
-                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-            });
+            if(ip.isEmpty()) {
+                socketClient = new WebSocketClient(() -> {
+                    startActivity(new Intent(MainActivity.this, HomePage.class));
+                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                });
+            }
+            else{
+                socketClient = new WebSocketClient(ip,4275,() -> {
+                    startActivity(new Intent(MainActivity.this, HomePage.class));
+                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                });
+            }
         }
     }
 

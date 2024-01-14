@@ -1,15 +1,19 @@
 package com.unknownn.mouseclient
 
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import androidx.appcompat.app.AppCompatActivity
+import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import androidx.activity.OnBackPressedCallback
+import androidx.appcompat.app.AppCompatActivity
 import com.unknownn.mouseclient.classes.MyImagePlotter
 import com.unknownn.mouseclient.classes.ScreenShareListener
 import com.unknownn.mouseclient.classes.showSafeToast
 import com.unknownn.mouseclient.databinding.ActivityScreenShareBinding
+import java.util.concurrent.Executors
+
 
 class ScreenShareActivity : AppCompatActivity() {
 
@@ -50,6 +54,7 @@ class ScreenShareActivity : AppCompatActivity() {
         onBackPressedDispatcher.addCallback(this,object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 MainActivity.socketClient?.stopScreenShare()
+                interpolator.shutdownNow()
                 finish()
             }
         })
@@ -98,7 +103,78 @@ class ScreenShareActivity : AppCompatActivity() {
         }
 
         if(bitmap == null) return
-        binding.myImagePlotter.updateFrame(bitmap)
+        interpolateAndUpdate(bitmap)
+    }
+
+
+    private val mHandler = Handler(Looper.getMainLooper())
+    private fun updateFrame(bitmap: Bitmap){
+        mHandler.post{
+            binding.myImagePlotter.updateFrame(bitmap)
+        }
+    }
+
+    private val noOfFramesBetween = 2
+    //private val interpolator = Executors.newFixedThreadPool(noOfFramesBetween)
+    private val interpolator = Executors.newSingleThreadExecutor()
+    private var prevBitmap:Bitmap? = null
+    private var isRunning = false
+    private fun interpolateAndUpdate(curBitmap: Bitmap) {
+        //if(isRunning) return
+
+        if(interpolator.isShutdown) return
+
+        //isRunning = true
+        interpolator.execute{
+            if (prevBitmap == null) {
+                prevBitmap = curBitmap
+                updateFrame(curBitmap)
+            }
+            else {
+
+                val width: Int = prevBitmap!!.width
+                val height: Int = curBitmap.height
+                val pixels1 = IntArray(width * height)
+                val pixels2 = IntArray(width * height)
+
+                prevBitmap!!.getPixels(pixels1, 0, width, 0, 0, width, height)
+                curBitmap.getPixels(pixels2, 0, width, 0, 0, width, height)
+
+                val interpolatedPixels = IntArray(width * height)
+
+                fun getIntermediateFrame(alpha:Float):Bitmap {
+                    val started = System.currentTimeMillis()
+
+                    for (i in pixels1.indices) {
+                        val color1 = pixels1[i]
+                        val color2 = pixels2[i]
+                        val red = ((1 - alpha) * Color.red(color1) + alpha * Color.red(color2)).toInt()
+                        val green = ((1 - alpha) * Color.green(color1) + alpha * Color.green(color2)).toInt()
+                        val blue = ((1 - alpha) * Color.blue(color1) + alpha * Color.blue(color2)).toInt()
+                        interpolatedPixels[i] = Color.rgb(red, green, blue)
+                    }
+
+                    val interpolatedBitmap = Bitmap.createBitmap(width, height, prevBitmap!!.config)
+                    interpolatedBitmap.setPixels(interpolatedPixels, 0, width, 0, 0, width, height)
+
+                    val ended = System.currentTimeMillis()
+                    println( "Interpolation: Total: ${(ended-started)} ms" )
+                    return interpolatedBitmap
+                }
+
+                var alpha = 0.6f
+                for (i in 1 until 4) {
+                    alpha += 0.1f
+                    val bitmap = getIntermediateFrame(alpha)
+                    updateFrame(bitmap)
+                    println("Bitmap interpolated: $i")
+                }
+                prevBitmap!!.recycle()
+                prevBitmap = curBitmap
+            }
+            //isRunning = false
+        }
+
     }
 
 }

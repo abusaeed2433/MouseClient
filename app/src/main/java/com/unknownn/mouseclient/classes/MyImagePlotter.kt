@@ -215,11 +215,11 @@ class MyImagePlotter : View {
 
     fun updateFrame(bitmap: Bitmap){
         if(scalingInProgress) {
-            bitmap.recycle()
+            //bitmap.recycle()
             return
         }
 
-        curBitmap?.recycle()
+        //curBitmap?.recycle()
         curBitmap = bitmap
         isDrawingRequested = true
         invalidate()

@@ -21,12 +21,23 @@ public class WebSocketClient {
 
     private DataListener dataListener = null;
     private ScreenShareListener screenShareListener = null;
+    private String host = "192.168.0.104";
+    private int port = 4275;
+
+    public WebSocketClient(String ip, int port,SocketListener socketListener){
+        this.socketListener = socketListener;
+        this.host = ip;
+        this.port = port;
+
+        createManualClient();
+    }
 
     public WebSocketClient(SocketListener socketListener){
         this.socketListener = socketListener;
         createManualClient();
-        //createClientObject();
     }
+
+
 
     private DataInputStream dataInputStream = null;
     private void createManualClient(){
@@ -35,8 +46,6 @@ public class WebSocketClient {
         service.execute(() -> {
             while (true) {
                 try {
-                    String host = "192.168.0.104";
-                    int port = 4275;
 
                     System.out.println("Trying to connect to "+host+":"+port);
 
