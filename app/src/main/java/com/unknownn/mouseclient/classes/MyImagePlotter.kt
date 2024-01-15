@@ -81,7 +81,7 @@ class MyImagePlotter : View {
         canvas.save()
         canvas.scale(scaleFactor, scaleFactor, myPivotX, myPivotY)
 
-        canvas.drawPath(screenBoundary,greenPaintBrush)
+        canvas.drawPath(screenBoundary,redPaintBrush)
 
         if(curBitmap != null && fullRect != null) {
             canvas.drawBitmap(curBitmap!!,null, fullRect!!,null);
@@ -128,29 +128,30 @@ class MyImagePlotter : View {
     }
 
     fun setScreenInfo(width:Float, height:Float) {
+        post {
+            val padPercent = 0.05f
 
-        val padPercent = 0.05f
+            val curWidth = (1 - padPercent) * getWidth()
+            val widthExcluded = (getWidth() - curWidth)
 
-        val curWidth = (1 - padPercent) * getWidth()
-        val widthExcluded = (getWidth() - curWidth)
+            val curHeight = (1 - padPercent) * getHeight()
+            val heightExcluded = (getHeight() - curHeight)
 
-        val curHeight = (1 - padPercent) * getHeight()
-        val heightExcluded = (getHeight() - curHeight)
+            val widthRatio = curWidth / width
+            val heightRatio = curHeight / height
 
-        val widthRatio = curWidth / width
-        val heightRatio = curHeight / height
+            val mn = min(widthRatio, heightRatio)
 
-        val mn = min(widthRatio,heightRatio)
+            this.boundaryWidth = mn * width
+            this.boundaryHeight = mn * height
 
-        this.boundaryWidth = mn * width
-        this.boundaryHeight = mn * height
+            widthPad = (curWidth - this.boundaryWidth + widthExcluded) / 2
+            heightPad = (curHeight - this.boundaryHeight + heightExcluded) / 2
 
-        widthPad = ( curWidth - this.boundaryWidth + widthExcluded) / 2
-        heightPad = ( curHeight - this.boundaryHeight + heightExcluded) / 2
-
-        updateBoundary(this.boundaryWidth,this.boundaryHeight)
-
-        drawPixel()
+            updateBoundary(this.boundaryWidth, this.boundaryHeight)
+            invalidate()
+            //drawPixel()
+        }
     }
 
     private fun drawPixel(){
@@ -198,16 +199,17 @@ class MyImagePlotter : View {
     }
 
     private fun updateBoundary(width: Float, height: Float){
+        val extra = 8f
 
         screenBoundary.reset()
-        screenBoundary.moveTo(widthPad,heightPad)
-        screenBoundary.lineTo(width + widthPad,heightPad)
+        screenBoundary.moveTo(widthPad-extra,heightPad-extra)
+        screenBoundary.lineTo(width + widthPad+extra,heightPad-extra)
 
-        screenBoundary.lineTo(width + widthPad,height + heightPad)
+        screenBoundary.lineTo(width + widthPad+extra,height + heightPad+extra)
 
-        screenBoundary.lineTo(widthPad,height + heightPad)
+        screenBoundary.lineTo(widthPad-extra,height + heightPad+extra)
 
-        screenBoundary.lineTo(widthPad,heightPad)
+        screenBoundary.lineTo(widthPad-extra,heightPad-extra)
 
         fullRect = RectF(widthPad,heightPad,width+widthPad,height+heightPad)
         invalidate()

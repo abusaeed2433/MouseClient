@@ -1,6 +1,5 @@
 package com.unknownn.mouseclient
 
-import android.R.fraction
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
@@ -45,10 +44,11 @@ class ScreenShareActivity : AppCompatActivity() {
 
             override fun onScreenSizeReceived(width: Int, height: Int) {
                 initImagePlotter(width.toFloat(),height.toFloat())
+                println("screen dimension received $width & $height")
+                MainActivity.socketClient?.requestScreenShare()
             }
         })
         MainActivity.socketClient?.requestScreenInfo()
-        MainActivity.socketClient?.requestScreenShare()
     }
 
     private fun setListener(){
@@ -62,7 +62,7 @@ class ScreenShareActivity : AppCompatActivity() {
     }
 
     private fun initImagePlotter(width:Float, height:Float){
-        binding.myImagePlotter.setImageResolution(80,60)
+        //binding.myImagePlotter.setImageResolution(80,60)
 
         binding.myImagePlotter.plotListener = object : MyImagePlotter.ImagePlotListener{
             override fun onMessageFound(message: String) {
@@ -81,36 +81,36 @@ class ScreenShareActivity : AppCompatActivity() {
     private var fpsEndTime = 0L
 
     companion object{
-        const val FPS_INTERVAL = 10_000 // 10 s
+        const val FPS_INTERVAL = 5_000 // 5 s
     }
+
     private fun updateFrame(imageBytes:ByteArray){
-        val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+        synchronized(this) {
+            val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
 
-        if(frameCounter == 0){
-            fpsStartTime = System.currentTimeMillis()
+            fpsEndTime = System.currentTimeMillis()
+
+            if ((fpsEndTime - fpsStartTime) >= FPS_INTERVAL) {
+
+                val fps = (frameCounter / ((fpsEndTime - fpsStartTime) / 1000.0))
+                val strFps = "FPS:${String.format("%.2f", fps)}"
+                binding.tvFps.text = strFps
+
+                frameCounter = 0
+                fpsStartTime = System.currentTimeMillis()
+            }
+
+            if (bitmap == null) return
+            interpolateAndUpdate(bitmap)
         }
-
-        frameCounter++
-
-        fpsEndTime = System.currentTimeMillis()
-
-        if( (fpsEndTime - fpsStartTime) >= FPS_INTERVAL ){
-
-            val fps = (frameCounter / ((fpsEndTime - fpsStartTime)/1000.0) )
-            val strFps = "FPS:${String.format("%.2f",fps)}"
-            binding.tvFps.text = strFps
-
-            frameCounter = 0
-        }
-
-        if(bitmap == null) return
-        interpolateAndUpdate(bitmap)
     }
 
 
     private val mHandler = Handler(Looper.getMainLooper())
     private fun updateFrame(bitmap: Bitmap){
         mHandler.post{
+            frameCounter++
+            println("Frame counter $frameCounter")
             binding.myImagePlotter.updateFrame(bitmap)
         }
     }
@@ -147,8 +147,7 @@ class ScreenShareActivity : AppCompatActivity() {
                     return (startValue + fraction * (endValue - startValue)).toInt()
                 }
 
-                val fraction = 0.75f
-                fun getIntermediateFrame(alpha:Float):Bitmap {
+                fun getIntermediateFrame(fraction:Float):Bitmap {
                     val started = System.currentTimeMillis()
 
                     for (i in pixels1.indices) {
@@ -169,16 +168,16 @@ class ScreenShareActivity : AppCompatActivity() {
                     interpolatedBitmap.setPixels(interpolatedPixels, 0, width, 0, 0, width, height)
 
                     val ended = System.currentTimeMillis()
-                    println( "Interpolation: Total: ${(ended-started)} ms" )
+                    //println( "Interpolation: Total: ${(ended-started)} ms" )
                     return interpolatedBitmap
                 }
 
-                var alpha = 0.6f
-                for (i in 1 until 4) {
-                    alpha += 0.1f
-                    val bitmap = getIntermediateFrame(alpha)
+                var fraction = 0f
+                for (i in 0 until 2) {
+                    fraction += 0.45f
+                    val bitmap = getIntermediateFrame(fraction)
                     updateFrame(bitmap)
-                    println("Bitmap interpolated: $i")
+                    //println("Bitmap interpolated: $i")
                 }
                 prevBitmap!!.recycle()
                 prevBitmap = curBitmap
