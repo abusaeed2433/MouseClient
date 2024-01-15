@@ -24,6 +24,7 @@ class MyImagePlotter : View {
     private val greenPaintBrush = Paint()
     private val bluePaintBrush = Paint()
     private val whitePaintBrush = Paint()
+    private val grayPaintBrush = Paint()
 
     private var boundaryWidth = 0f
     private var boundaryHeight = 0f
@@ -81,7 +82,7 @@ class MyImagePlotter : View {
         canvas.save()
         canvas.scale(scaleFactor, scaleFactor, myPivotX, myPivotY)
 
-        canvas.drawPath(screenBoundary,redPaintBrush)
+        canvas.drawPath(screenBoundary,grayPaintBrush)
 
         if(curBitmap != null && fullRect != null) {
             canvas.drawBitmap(curBitmap!!,null, fullRect!!,null);
@@ -107,7 +108,7 @@ class MyImagePlotter : View {
 
         scaleGestureDetector = ScaleGestureDetector(context, ScaleListener())
 
-        val list = listOf(redPaintBrush,greenPaintBrush,bluePaintBrush,whitePaintBrush)
+        val list = listOf(redPaintBrush,greenPaintBrush,bluePaintBrush,whitePaintBrush, grayPaintBrush)
 
         for(paintBrush in list){
             paintBrush.isAntiAlias = true
@@ -121,6 +122,7 @@ class MyImagePlotter : View {
         greenPaintBrush.color = Color.GREEN
         bluePaintBrush.color = Color.BLUE
         whitePaintBrush.color = Color.WHITE
+        grayPaintBrush.color = Color.GRAY
     }
 
     fun setImageResolution(widthPx:Int, heightPx:Int){
@@ -199,7 +201,7 @@ class MyImagePlotter : View {
     }
 
     private fun updateBoundary(width: Float, height: Float){
-        val extra = 8f
+        val extra = 20f
 
         screenBoundary.reset()
         screenBoundary.moveTo(widthPad-extra,heightPad-extra)
