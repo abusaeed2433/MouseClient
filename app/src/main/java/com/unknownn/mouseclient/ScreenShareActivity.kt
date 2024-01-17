@@ -97,19 +97,19 @@ class ScreenShareActivity : AppCompatActivity() {
             fpsEndTime = System.currentTimeMillis()
             frameReceived++
 
-            val strFps = "Frame - No: $frameReceived"
-            binding.tvFps.text = strFps
+            val strReceived = "Received: $frameReceived"
+            binding.tvReceived.text = strReceived
 
-/*            if ((fpsEndTime - fpsStartTime) >= FPS_INTERVAL) {
+            if ((fpsEndTime - fpsStartTime) >= FPS_INTERVAL) {
 
                 val fps = (frameCounter / ((fpsEndTime - fpsStartTime) / 1000.0))
-                val strFps = "FPS:${String.format("%.2f", fps)} -frame-No: $frameReceived"
+                val strFps = "FPS:${String.format("%.2f", fps)}"
                 binding.tvFps.text = strFps
 
                 println("Fps calculate with counter $frameCounter")
                 frameCounter = 0
                 fpsStartTime = System.currentTimeMillis()
-            }*/
+            }
 
             if (bitmap == null) return
             interpolateAndUpdate(prevBitmap,bitmap)

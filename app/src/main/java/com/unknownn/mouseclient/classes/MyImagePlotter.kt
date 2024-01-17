@@ -225,7 +225,7 @@ class MyImagePlotter : View {
 
         tempPrev = curBitmap
         curBitmap = bitmap
-        tempPrev?.recycle()
+        //tempPrev?.recycle()
 
         isDrawingRequested = true
         invalidate()
