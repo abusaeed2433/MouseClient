@@ -12,6 +12,7 @@ import com.unknownn.mouseclient.classes.MyImagePlotter
 import com.unknownn.mouseclient.classes.ScreenShareListener
 import com.unknownn.mouseclient.classes.showSafeToast
 import com.unknownn.mouseclient.databinding.ActivityScreenShareBinding
+import java.lang.Thread.sleep
 import java.util.concurrent.Executors
 
 
@@ -26,6 +27,7 @@ class ScreenShareActivity : AppCompatActivity() {
 
         initializeConnection()
         setListener()
+        startFrameUpdater()
 
 /*        Handler(Looper.getMainLooper()).postDelayed({
             initImagePlotter(1200f,720f)
@@ -55,7 +57,9 @@ class ScreenShareActivity : AppCompatActivity() {
         onBackPressedDispatcher.addCallback(this,object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 MainActivity.socketClient?.stopScreenShare()
-                interpolator.shutdownNow()
+                interpolatorService.shutdownNow()
+                frameUpdaterService.shutdownNow()
+                stopFrameHandler = true
                 finish()
             }
         })
@@ -82,6 +86,7 @@ class ScreenShareActivity : AppCompatActivity() {
 
     companion object{
         const val FPS_INTERVAL = 5_000 // 5 s
+        const val FRAME_QUEUE_SIZE = 57
     }
 
     private fun updateFrame(imageBytes:ByteArray){
@@ -96,95 +101,127 @@ class ScreenShareActivity : AppCompatActivity() {
                 val strFps = "FPS:${String.format("%.2f", fps)}"
                 binding.tvFps.text = strFps
 
+                println("Fps calculate with counter $frameCounter")
                 frameCounter = 0
                 fpsStartTime = System.currentTimeMillis()
             }
 
             if (bitmap == null) return
-            interpolateAndUpdate(bitmap)
+            interpolateAndUpdate(prevBitmap,bitmap)
+            prevBitmap = bitmap
         }
     }
 
 
+    private val frameQueue = arrayOfNulls<Bitmap?>(FRAME_QUEUE_SIZE)
+    private var curFrameIndex = 0
+
+    private val frameUpdaterService = Executors.newSingleThreadExecutor()
+    private var stopFrameHandler = false
+
     private val mHandler = Handler(Looper.getMainLooper())
-    private fun updateFrame(bitmap: Bitmap){
-        mHandler.post{
+    private fun startFrameUpdater(){
+        frameUpdaterService.execute {
+            var sleepTime = 40L
+
+            while (true){
+                if(stopFrameHandler) break
+
+                if( frameQueue[curFrameIndex] == null ){
+                    sleepTime = 30
+                }
+                else{
+                    val bitmap = frameQueue[curFrameIndex]!!
+                    frameQueue[curFrameIndex] = null
+                    curFrameIndex = (curFrameIndex + 1) % FRAME_QUEUE_SIZE
+
+                    println("Frame index $curFrameIndex")
+
+                    updateFrame(bitmap)
+                    sleepTime = 40
+                }
+
+                try {
+                    sleep(sleepTime)
+                }catch (ignored:InterruptedException){}
+            }
+        }
+    }
+
+    private fun updateFrame(bitmap:Bitmap){
+        mHandler.post {
             frameCounter++
-            println("Frame counter $frameCounter")
             binding.myImagePlotter.updateFrame(bitmap)
         }
     }
 
     private val noOfFramesBetween = 2
-    //private val interpolator = Executors.newFixedThreadPool(noOfFramesBetween)
-    private val interpolator = Executors.newSingleThreadExecutor()
+    private val interpolatorService = Executors.newFixedThreadPool(FRAME_QUEUE_SIZE/2)
     private var prevBitmap:Bitmap? = null
     private var isRunning = false
-    private fun interpolateAndUpdate(curBitmap: Bitmap) {
-        //if(isRunning) return
+    private var frameIndex = 0
+    private var locker = Any()
 
-        if(interpolator.isShutdown) return
+    private fun interpolateAndUpdate(tempPrevBitmap: Bitmap?, curBitmap: Bitmap) {
+        if(interpolatorService.isShutdown) return
 
-        //isRunning = true
-        interpolator.execute{
-            if (prevBitmap == null) {
-                prevBitmap = curBitmap
-                updateFrame(curBitmap)
+        interpolatorService.execute{
+            println("Frame submitted for interpolation")
+            if(stopFrameHandler) return@execute
+
+            val started = System.currentTimeMillis()
+
+            var prevBitmap = tempPrevBitmap ?: curBitmap
+
+            var myIndex:Int
+            synchronized(locker){
+                myIndex = frameIndex
+                frameIndex = (frameIndex +  noOfFramesBetween + 1) % FRAME_QUEUE_SIZE
             }
-            else {
+            // myIndex, myIndex+1, myIndex+2
 
-                val width: Int = prevBitmap!!.width
-                val height: Int = curBitmap.height
-                val pixels1 = IntArray(width * height)
-                val pixels2 = IntArray(width * height)
+            val width: Int = prevBitmap.width
+            val height: Int = curBitmap.height
+            val pixels1 = IntArray(width * height)
+            val pixels2 = IntArray(width * height)
 
-                prevBitmap!!.getPixels(pixels1, 0, width, 0, 0, width, height)
-                curBitmap.getPixels(pixels2, 0, width, 0, 0, width, height)
+            prevBitmap.getPixels(pixels1, 0, width, 0, 0, width, height)
+            curBitmap.getPixels(pixels2, 0, width, 0, 0, width, height)
 
-                val interpolatedPixels = IntArray(width * height)
+            val interpolatedPixels = IntArray(width * height)
 
-                fun lerp(startValue:Int, endValue:Int, fraction:Float):Int {
-                    return (startValue + fraction * (endValue - startValue)).toInt()
+            fun getIntermediateFrame(fraction:Float):Bitmap {
+                for (i in pixels1.indices) {
+                    val color1 = pixels1[i]
+                    val color2 = pixels2[i]
+
+                    val red: Int = lerp(Color.red(color1), Color.red(color2), fraction)
+                    val green: Int = lerp(Color.green(color1), Color.green(color2), fraction)
+                    val blue: Int = lerp(Color.blue(color1), Color.blue(color2), fraction)
+                    interpolatedPixels[i] = Color.rgb(red, green, blue)
                 }
 
-                fun getIntermediateFrame(fraction:Float):Bitmap {
-                    val started = System.currentTimeMillis()
-
-                    for (i in pixels1.indices) {
-                        val color1 = pixels1[i]
-                        val color2 = pixels2[i]
-
-                        val red: Int = lerp(Color.red(color1), Color.red(color2), fraction)
-                        val green: Int = lerp(Color.green(color1), Color.green(color2), fraction)
-                        val blue: Int = lerp(Color.blue(color1), Color.blue(color2), fraction)
-
-                        /*val red = ((1 - alpha) * Color.red(color1) + alpha * Color.red(color2)).toInt()
-                        val green = ((1 - alpha) * Color.green(color1) + alpha * Color.green(color2)).toInt()
-                        val blue = ((1 - alpha) * Color.blue(color1) + alpha * Color.blue(color2)).toInt()*/
-                        interpolatedPixels[i] = Color.rgb(red, green, blue)
-                    }
-
-                    val interpolatedBitmap = Bitmap.createBitmap(width, height, prevBitmap!!.config)
-                    interpolatedBitmap.setPixels(interpolatedPixels, 0, width, 0, 0, width, height)
-
-                    val ended = System.currentTimeMillis()
-                    //println( "Interpolation: Total: ${(ended-started)} ms" )
-                    return interpolatedBitmap
-                }
-
-                var fraction = 0f
-                for (i in 0 until 2) {
-                    fraction += 0.45f
-                    val bitmap = getIntermediateFrame(fraction)
-                    updateFrame(bitmap)
-                    //println("Bitmap interpolated: $i")
-                }
-                prevBitmap!!.recycle()
-                prevBitmap = curBitmap
+                val bitmap = Bitmap.createBitmap(width, height, prevBitmap.config)
+                bitmap.setPixels(interpolatedPixels, 0, width, 0, 0, width, height)
+                return bitmap
             }
-            //isRunning = false
+
+            var fraction = 0f
+            for (i in 0 until noOfFramesBetween) { // 2
+                fraction += 0.3f
+                val bitmap = getIntermediateFrame(fraction)
+                prevBitmap = bitmap
+                frameQueue[myIndex++] = bitmap
+            }
+            frameQueue[myIndex++] = curBitmap
+            val ended = System.currentTimeMillis()
+            println( "Interpolation: Total: ${(ended-started)} ms" )
         }
 
+    }
+
+    fun lerp(startValue:Int, endValue:Int, fraction:Float):Int {
+        return (startValue + fraction * (endValue - startValue)).toInt()
     }
 
 }

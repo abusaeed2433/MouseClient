@@ -84,7 +84,7 @@ class MyImagePlotter : View {
 
         canvas.drawPath(screenBoundary,grayPaintBrush)
 
-        if(curBitmap != null && fullRect != null) {
+        if(curBitmap != null && !curBitmap!!.isRecycled && fullRect != null) {
             canvas.drawBitmap(curBitmap!!,null, fullRect!!,null);
         }
 
@@ -217,14 +217,16 @@ class MyImagePlotter : View {
         invalidate()
     }
 
+    var tempPrev:Bitmap? = null
     fun updateFrame(bitmap: Bitmap){
         if(scalingInProgress) {
-            //bitmap.recycle()
             return
         }
 
-        //curBitmap?.recycle()
+        tempPrev = curBitmap
         curBitmap = bitmap
+        tempPrev?.recycle()
+
         isDrawingRequested = true
         invalidate()
     }
