@@ -89,22 +89,27 @@ class ScreenShareActivity : AppCompatActivity() {
         const val FRAME_QUEUE_SIZE = 57
     }
 
+    var frameReceived = 0
     private fun updateFrame(imageBytes:ByteArray){
         synchronized(this) {
             val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
 
             fpsEndTime = System.currentTimeMillis()
+            frameReceived++
 
-            if ((fpsEndTime - fpsStartTime) >= FPS_INTERVAL) {
+            val strFps = "Frame - No: $frameReceived"
+            binding.tvFps.text = strFps
+
+/*            if ((fpsEndTime - fpsStartTime) >= FPS_INTERVAL) {
 
                 val fps = (frameCounter / ((fpsEndTime - fpsStartTime) / 1000.0))
-                val strFps = "FPS:${String.format("%.2f", fps)}"
+                val strFps = "FPS:${String.format("%.2f", fps)} -frame-No: $frameReceived"
                 binding.tvFps.text = strFps
 
                 println("Fps calculate with counter $frameCounter")
                 frameCounter = 0
                 fpsStartTime = System.currentTimeMillis()
-            }
+            }*/
 
             if (bitmap == null) return
             interpolateAndUpdate(prevBitmap,bitmap)
@@ -156,7 +161,7 @@ class ScreenShareActivity : AppCompatActivity() {
     }
 
     private val noOfFramesBetween = 2
-    private val interpolatorService = Executors.newFixedThreadPool(FRAME_QUEUE_SIZE/2)
+    private val interpolatorService = Executors.newFixedThreadPool(FRAME_QUEUE_SIZE)
     private var prevBitmap:Bitmap? = null
     private var isRunning = false
     private var frameIndex = 0
