@@ -112,7 +112,8 @@ class ScreenShareActivity : AppCompatActivity() {
             }
 
             if (bitmap == null) return
-            interpolateAndUpdate(prevBitmap,bitmap)
+            //interpolateAndUpdate(prevBitmap,bitmap)
+            updateFrame(bitmap)
             prevBitmap = bitmap
         }
     }
@@ -127,7 +128,7 @@ class ScreenShareActivity : AppCompatActivity() {
     private val mHandler = Handler(Looper.getMainLooper())
     private fun startFrameUpdater(){
         frameUpdaterService.execute {
-            var sleepTime = 40L
+            var sleepTime: Long
 
             while (true){
                 if(stopFrameHandler) break
