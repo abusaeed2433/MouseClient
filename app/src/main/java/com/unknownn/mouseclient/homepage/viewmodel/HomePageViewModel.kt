@@ -7,7 +7,7 @@ import com.unknownn.mouseclient.MainActivity
 import com.unknownn.mouseclient.R
 import com.unknownn.mouseclient.homepage.model.DataListener
 import com.unknownn.mouseclient.homepage.model.MyTouchPad
-import com.unknownn.mouseclient.homepage.model.ScreenShareListener
+import com.unknownn.mouseclient.screen_share_activity.model.ScreenShareListener
 import com.unknownn.mouseclient.homepage.model.SharedCommand
 
 class HomePageViewModel(application: Application):AndroidViewModel(application) {

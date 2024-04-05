@@ -2,8 +2,8 @@ package com.unknownn.mouseclient.classes;
 
 import com.google.gson.Gson;
 import com.unknownn.mouseclient.homepage.model.DataListener;
-import com.unknownn.mouseclient.homepage.model.ScreenShareListener;
 import com.unknownn.mouseclient.homepage.model.SharedCommand;
+import com.unknownn.mouseclient.screen_share_activity.model.ScreenShareListener;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;

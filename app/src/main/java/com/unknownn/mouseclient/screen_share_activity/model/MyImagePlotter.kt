@@ -1,4 +1,4 @@
-package com.unknownn.mouseclient.classes
+package com.unknownn.mouseclient.screen_share_activity.model
 
 import android.annotation.SuppressLint
 import android.content.Context

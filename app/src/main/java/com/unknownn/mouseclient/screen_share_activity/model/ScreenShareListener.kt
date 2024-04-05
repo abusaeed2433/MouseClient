@@ -1,4 +1,4 @@
-package com.unknownn.mouseclient.homepage.model
+package com.unknownn.mouseclient.screen_share_activity.model
 
 interface ScreenShareListener {
     fun onCommandReceived(byteArray:ByteArray)

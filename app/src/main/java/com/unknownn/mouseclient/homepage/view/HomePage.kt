@@ -6,7 +6,7 @@ import android.view.MenuItem
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import com.unknownn.mouseclient.ScreenShareActivity
+import com.unknownn.mouseclient.screen_share_activity.view.ScreenShareActivity
 import com.unknownn.mouseclient.databinding.ActivityHomePageBinding
 import com.unknownn.mouseclient.homepage.viewmodel.HomePageViewModel
 
