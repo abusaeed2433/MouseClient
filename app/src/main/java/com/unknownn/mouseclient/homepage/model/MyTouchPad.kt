@@ -1,4 +1,4 @@
-package com.unknownn.mouseclient.classes
+package com.unknownn.mouseclient.homepage.model
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -43,7 +43,7 @@ class MyTouchPad : View {
     private var prevPosition = Pair(0f,0f)
     private var curPosition = Pair(0f,0f)
 
-    var touchPadListener:TouchPadListener? = null
+    var touchPadListener: TouchPadListener? = null
 
     private val separatorPath = Path()
     private val scrollPath = Path()

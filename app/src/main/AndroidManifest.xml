@@ -31,7 +31,7 @@
         </activity>
 
         <activity
-            android:name=".HomePage"
+            android:name=".homepage.view.HomePage"
             android:exported="true"
             android:theme="@style/fullScreenActivity"
             android:screenOrientation="landscape" >

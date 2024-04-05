@@ -1,8 +1,8 @@
-package com.unknownn.mouseclient.classes
+package com.unknownn.mouseclient.homepage.model
 
 import java.io.Serializable
 
-class SharedCommand(val type:Type, vararg args:Float): Serializable {
+class SharedCommand(val type: Type, vararg args:Float): Serializable {
 
     var byteArrayOfImage:ByteArray? = null
 

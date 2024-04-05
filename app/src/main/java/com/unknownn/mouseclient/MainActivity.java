@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.unknownn.mouseclient.classes.WebSocketClient;
 import com.unknownn.mouseclient.databinding.ActivityMainBinding;
+import com.unknownn.mouseclient.homepage.view.HomePage;
 
 public class MainActivity extends AppCompatActivity {
 

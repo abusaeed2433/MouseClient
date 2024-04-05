@@ -9,7 +9,7 @@ import android.os.Looper
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.unknownn.mouseclient.classes.MyImagePlotter
-import com.unknownn.mouseclient.classes.ScreenShareListener
+import com.unknownn.mouseclient.homepage.model.ScreenShareListener
 import com.unknownn.mouseclient.classes.showSafeToast
 import com.unknownn.mouseclient.databinding.ActivityScreenShareBinding
 import java.lang.Thread.sleep
@@ -37,7 +37,7 @@ class ScreenShareActivity : AppCompatActivity() {
     private fun initializeConnection(){
         val mHandler = Handler(Looper.getMainLooper())
 
-        MainActivity.socketClient?.setScreenShareListener(object : ScreenShareListener{
+        MainActivity.socketClient?.setScreenShareListener(object : ScreenShareListener {
             override fun onCommandReceived(byteArray: ByteArray) {
                 mHandler.post{
                     updateFrame(byteArray)
