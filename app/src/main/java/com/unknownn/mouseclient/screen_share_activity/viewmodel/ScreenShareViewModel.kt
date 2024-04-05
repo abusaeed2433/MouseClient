@@ -8,10 +8,12 @@ import android.os.Looper
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import com.unknownn.mouseclient.MainActivity
+import com.unknownn.mouseclient.homepage.model.MyTouchPad
+import com.unknownn.mouseclient.homepage.viewmodel.HomePageViewModel
 import com.unknownn.mouseclient.screen_share_activity.model.ScreenShareListener
 import java.util.concurrent.Executors
 
-class ScreenShareViewModel(application: Application):AndroidViewModel(application) {
+class ScreenShareViewModel(application: Application):HomePageViewModel(application) {
     private var application:Application
 
     val screenSizeLD: MutableLiveData<Pair<Float, Float>?> = MutableLiveData(null)
@@ -24,7 +26,7 @@ class ScreenShareViewModel(application: Application):AndroidViewModel(applicatio
     }
 
 
-    fun setupScreenShareListener(){
+    override fun setupScreenShareListener(){
         MainActivity.socketClient?.setScreenShareListener( object : ScreenShareListener {
             override fun onCommandReceived(byteArray: ByteArray) {
                 updateFrame(byteArray)
@@ -36,9 +38,6 @@ class ScreenShareViewModel(application: Application):AndroidViewModel(applicatio
         } )
     }
 
-    fun requestScreenInfo(){
-        MainActivity.socketClient?.requestScreenInfo()
-    }
 
     fun requestScreenShare(){
         MainActivity.socketClient?.requestScreenShare()

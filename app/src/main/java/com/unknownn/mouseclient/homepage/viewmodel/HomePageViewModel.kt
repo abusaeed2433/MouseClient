@@ -10,7 +10,7 @@ import com.unknownn.mouseclient.homepage.model.MyTouchPad
 import com.unknownn.mouseclient.screen_share_activity.model.ScreenShareListener
 import com.unknownn.mouseclient.homepage.model.SharedCommand
 
-class HomePageViewModel(application: Application):AndroidViewModel(application) {
+open class HomePageViewModel(application: Application):AndroidViewModel(application) {
     private var application:Application
 
     private lateinit var touchListener: MyTouchPad.TouchPadListener
@@ -46,7 +46,7 @@ class HomePageViewModel(application: Application):AndroidViewModel(application) 
         MainActivity.socketClient?.sendMessage(message)
     }
 
-    fun setupScreenShareListener(){
+    open fun setupScreenShareListener(){
         MainActivity.socketClient?.setScreenShareListener( screenShareListener )
     }
 

@@ -24,6 +24,7 @@ class ScreenShareActivity : AppCompatActivity() {
         setBackPressListener()
         observeViewModel()
         setupViewModel()
+        setupTouchPad()
     }
 
     private fun observeViewModel(){
@@ -53,6 +54,11 @@ class ScreenShareActivity : AppCompatActivity() {
         viewModel.setupScreenShareListener()
         viewModel.startFrameUpdater()
         viewModel.requestScreenInfo()
+    }
+
+    private fun setupTouchPad(){
+        val touchPad = binding.myTouchPad
+        touchPad.touchPadListener = viewModel.getTouchListener()
     }
 
     private fun setBackPressListener(){
