@@ -19,10 +19,10 @@ import kotlin.math.min
 class MyTouchPad : View {
 
     companion object {
-        private const val MAX_TIMEOUT = 200L // double of tap timeout
-        private const val SINGLE_CLICK_TIMEOUT = 150L
-        private const val TOLERANCE_DISTANCE = 2f // 12f was first used
-        private const val COMMAND_SEND_INTERVAL = 40L
+        const val MAX_TIMEOUT = 200L // double of tap timeout
+        const val SINGLE_CLICK_TIMEOUT = 150L
+        const val TOLERANCE_DISTANCE = 2f // 12f was first used
+        const val COMMAND_SEND_INTERVAL = 40L
         var staticMinLength = 12f
     }
 

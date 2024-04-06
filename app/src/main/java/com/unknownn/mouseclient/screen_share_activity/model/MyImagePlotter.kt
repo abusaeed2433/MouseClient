@@ -8,11 +8,16 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.RectF
+import android.os.Handler
+import android.os.Looper
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
 import android.view.ScaleGestureDetector.SimpleOnScaleGestureListener
 import android.view.View
+import com.unknownn.mouseclient.homepage.model.MyTouchPad
+import java.util.concurrent.Executors
+import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
@@ -39,6 +44,19 @@ class MyImagePlotter : View {
     private var fullRect:RectF? = null
     private var curBitmap:Bitmap? = null
 
+    // for touch
+    private var lastDrawTime = 0L
+    private var lastDownTime = 0L
+    private var prevClickDownTime = 0L
+
+    private var isFingerLifted = true
+
+    private var prevPosition = Pair(0f,0f)
+    private var curPosition = Pair(0f,0f)
+
+    private val currentPath = Path()
+    var touchPadListener: MyTouchPad.TouchPadListener? = null
+
     constructor(context: Context?) : super(context) {
         if (isInEditMode) return
         initializeAll()
@@ -54,15 +72,106 @@ class MyImagePlotter : View {
         initializeAll()
     }
 
+    private fun initAll(){
+        var count = 1
+        var isSecondTime = false
+        val service = Executors.newFixedThreadPool(1)
+        val mHandler = Handler(Looper.getMainLooper())
+
+        // mouse move
+        service.execute{
+            while (true) {
+                count = (count+1) % 4
+                Thread.sleep(MyTouchPad.COMMAND_SEND_INTERVAL)
+
+                if(count % 4 == 0) {
+                    val timeSpent = System.currentTimeMillis() - lastDrawTime
+
+                    if (timeSpent > MyTouchPad.MAX_TIMEOUT && isFingerLifted) {
+                        mHandler.post {
+                            currentPath.reset()
+                            invalidate()
+                        }
+                    }
+                }
+
+                if(isFingerLifted) continue
+
+                if(prevPosition.first == 0f){
+                    prevPosition = curPosition
+                    continue
+                }
+
+                val dx = (curPosition.first - prevPosition.first) * widthMultiplier
+                val dy = (curPosition.second - prevPosition.second) * heightMultiplier
+
+                prevPosition = curPosition
+
+                if(abs(dx) < MyTouchPad.TOLERANCE_DISTANCE && abs(dy) < MyTouchPad.TOLERANCE_DISTANCE){
+                    continue
+                }
+
+                mHandler.post {
+                    if(isSecondTime) {
+                        isSecondTime = false
+                        touchPadListener?.onScrollRequest(dy)
+                    }
+                    else{
+                        isSecondTime = true
+                    }
+                }
+            }
+        }
+
+        service.shutdown()
+    }
 
     @SuppressLint("ClickableViewAccessibility")
-    @Override
-    public
-    override fun onTouchEvent(event: MotionEvent?): Boolean {
-        if (event != null) {
-            scaleGestureDetector?.onTouchEvent(event)
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        val x = event.x
+        val y = event.y
+
+        scaleGestureDetector?.onTouchEvent(event)
+
+        curPosition = Pair(x,y)
+
+        lastDrawTime = System.currentTimeMillis()
+
+        return when (event.action) {
+            MotionEvent.ACTION_DOWN -> {
+                lastDownTime = System.currentTimeMillis()
+                currentPath.reset()
+                isFingerLifted = false
+                true
+            }
+
+            MotionEvent.ACTION_MOVE -> {
+                currentPath.lineTo(x, y)
+                invalidate()
+                true
+            }
+
+            MotionEvent.ACTION_UP -> {
+                currentPath.lineTo(x, y)
+                isFingerLifted = true
+                prevPosition = Pair(0f,0f)
+                invalidate()
+                checkForClick()
+                true
+            }
+
+            else -> false
         }
-        return true
+    }
+
+    private fun checkForClick(){
+        val curTime = System.currentTimeMillis()
+
+        // not any click
+        if( (curTime - lastDownTime) > MyTouchPad.SINGLE_CLICK_TIMEOUT) return
+
+        touchPadListener?.onSingleClickRequest()
+        prevClickDownTime = lastDownTime
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -98,25 +207,31 @@ class MyImagePlotter : View {
         bluePaintBrush.color = Color.BLUE
         whitePaintBrush.color = Color.WHITE
         grayPaintBrush.color = Color.GRAY
+        initAll()
     }
 
-    fun setScreenInfo(width:Float, height:Float) {
+    private var widthMultiplier = 1f
+    private var heightMultiplier = 1f
+    fun setScreenInfo(serverWidth:Float, serverHeight:Float) {
         post {
             val padPercent = 0.05f
 
-            val curWidth = (1 - padPercent) * getWidth()
-            val widthExcluded = (getWidth() - curWidth)
+            val curWidth = (1 - padPercent) * width
+            val widthExcluded = (width - curWidth)
 
-            val curHeight = (1 - padPercent) * getHeight()
-            val heightExcluded = (getHeight() - curHeight)
+            val curHeight = (1 - padPercent) * height
+            val heightExcluded = (height - curHeight)
 
-            val widthRatio = curWidth / width
-            val heightRatio = curHeight / height
+            val widthRatio = curWidth / serverWidth
+            val heightRatio = curHeight / serverHeight
 
             val mn = min(widthRatio, heightRatio)
 
-            this.boundaryWidth = mn * width
-            this.boundaryHeight = mn * height
+            this.boundaryWidth = mn * serverWidth
+            this.boundaryHeight = mn * serverHeight
+
+            widthMultiplier = serverWidth / this.boundaryWidth
+            heightMultiplier = serverHeight / this.boundaryHeight
 
             widthPad = (curWidth - this.boundaryWidth + widthExcluded) / 2
             heightPad = (curHeight - this.boundaryHeight + heightExcluded) / 2

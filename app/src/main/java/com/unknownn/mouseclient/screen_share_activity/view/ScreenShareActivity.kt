@@ -57,8 +57,7 @@ class ScreenShareActivity : AppCompatActivity() {
     }
 
     private fun setupTouchPad(){
-        val touchPad = binding.myTouchPad
-        touchPad.touchPadListener = viewModel.getTouchListener()
+        binding.myImagePlotter.touchPadListener = viewModel.getTouchListener()
     }
 
     private fun setBackPressListener(){
