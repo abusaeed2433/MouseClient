@@ -77,6 +77,11 @@ open class HomePageViewModel(application: Application):AndroidViewModel(applicat
                 sendData(command)
             }
 
+            override fun onMoveThenClick(x: Float, y: Float) {
+                val command = SharedCommand(SharedCommand.Type.MOVE_THEN_CLICK, x,y)
+                sendData(command)
+            }
+
             override fun onDoubleClickRequest() {
                 val command = SharedCommand(SharedCommand.Type.DOUBLE_CLICK)
                 sendData(command)

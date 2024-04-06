@@ -22,7 +22,7 @@ class MyTouchPad : View {
         const val MAX_TIMEOUT = 200L // double of tap timeout
         const val SINGLE_CLICK_TIMEOUT = 150L
         const val TOLERANCE_DISTANCE = 2f // 12f was first used
-        const val COMMAND_SEND_INTERVAL = 40L
+        const val COMMAND_SEND_INTERVAL = 20L
         var staticMinLength = 12f
     }
 
@@ -112,7 +112,7 @@ class MyTouchPad : View {
                         setupScrollPath(dy)
                         if(isSecondTime) {
                             isSecondTime = false
-                            touchPadListener?.onScrollRequest(dy)
+                            touchPadListener?.onScrollRequest(dy/2)
                         }
                         else{
                             isSecondTime = true
@@ -274,6 +274,7 @@ class MyTouchPad : View {
         fun onMoveRequest(dx:Float,dy:Float)
         fun onScrollRequest(dy:Float)
         fun onSingleClickRequest()
+        fun onMoveThenClick(x:Float,y:Float)
         fun onDoubleClickRequest()
     }
 

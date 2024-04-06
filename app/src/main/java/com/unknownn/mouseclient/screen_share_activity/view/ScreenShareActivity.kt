@@ -25,6 +25,7 @@ class ScreenShareActivity : AppCompatActivity() {
         observeViewModel()
         setupViewModel()
         setupTouchPad()
+        //initImagePlotter(1320f,780f)
     }
 
     private fun observeViewModel(){
@@ -78,8 +79,8 @@ class ScreenShareActivity : AppCompatActivity() {
         }
 
         binding.myImagePlotter.setScreenInfo(
-            width - 0.1f*width,
-            height - 0.1f*height
+            width,// - 0.1f*width,
+            height// - 0.1f*height
         )
     }
 

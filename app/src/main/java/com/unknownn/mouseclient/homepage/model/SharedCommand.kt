@@ -13,7 +13,8 @@ class SharedCommand(val type: Type, vararg args:Float): Serializable {
 
     enum class Type{
         MOVE, // dx, dy
-        SINGLE_CLICK, // x,y
+        SINGLE_CLICK,
+        MOVE_THEN_CLICK, // x,y -> new position
         DOUBLE_CLICK, // x,y
         SCROLL, // dx, dy
         CLICK_AND_SCROLL, // dx, dy

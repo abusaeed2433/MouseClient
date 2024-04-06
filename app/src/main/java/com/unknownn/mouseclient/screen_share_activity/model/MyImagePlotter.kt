@@ -30,6 +30,7 @@ class MyImagePlotter : View {
     private val bluePaintBrush = Paint()
     private val whitePaintBrush = Paint()
     private val grayPaintBrush = Paint()
+    private val textPaintBrush = Paint()
 
     private var boundaryWidth = 0f
     private var boundaryHeight = 0f
@@ -52,6 +53,7 @@ class MyImagePlotter : View {
     private var isFingerLifted = true
 
     private var prevPosition = Pair(0f,0f)
+    private var clickPrevPosition = Pair(0f,0f)
     private var curPosition = Pair(0f,0f)
 
     private val currentPath = Path()
@@ -114,7 +116,7 @@ class MyImagePlotter : View {
                 mHandler.post {
                     if(isSecondTime) {
                         isSecondTime = false
-                        touchPadListener?.onScrollRequest(dy)
+                        touchPadListener?.onScrollRequest(dy/2)
                     }
                     else{
                         isSecondTime = true
@@ -128,8 +130,10 @@ class MyImagePlotter : View {
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        val x = event.x
-        val y = event.y
+        val x = event.x - widthPad
+        val y = event.y - heightPad
+
+        if(x < 0 || y < 0 || x > boundaryWidth || y > boundaryHeight) return false
 
         scaleGestureDetector?.onTouchEvent(event)
 
@@ -154,9 +158,9 @@ class MyImagePlotter : View {
             MotionEvent.ACTION_UP -> {
                 currentPath.lineTo(x, y)
                 isFingerLifted = true
-                prevPosition = Pair(0f,0f)
                 invalidate()
-                checkForClick()
+                checkForClick(x,y)
+                prevPosition = Pair(0f,0f)
                 true
             }
 
@@ -164,14 +168,21 @@ class MyImagePlotter : View {
         }
     }
 
-    private fun checkForClick(){
+    private fun checkForClick(x:Float, y:Float) {
         val curTime = System.currentTimeMillis()
 
         // not any click
         if( (curTime - lastDownTime) > MyTouchPad.SINGLE_CLICK_TIMEOUT) return
 
-        touchPadListener?.onSingleClickRequest()
-        prevClickDownTime = lastDownTime
+        println(this.boundaryWidth)
+        println(this.boundaryHeight)
+        val serverX = x * widthMultiplier
+        val serverY = y * heightMultiplier
+
+        println("App position: $x,$y. Server: $serverX, $serverY")
+
+        touchPadListener?.onMoveThenClick(serverX, serverY)
+        //prevClickDownTime = lastDownTime
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -180,7 +191,19 @@ class MyImagePlotter : View {
         canvas.save()
         canvas.scale(scaleFactor, scaleFactor, myPivotX, myPivotY)
 
-        canvas.drawPath(screenBoundary,grayPaintBrush)
+        canvas.drawPath(screenBoundary, grayPaintBrush)
+
+//        for(x in widthPad.toInt()..boundaryWidth.toInt() step 100){
+//            for(y in heightPad.toInt()..boundaryHeight.toInt() step 100){
+//                canvas.drawCircle(x.toFloat(),y.toFloat(),2f,redPaintBrush)
+//                canvas.drawText("$x,$y",x.toFloat(),y.toFloat(),textPaintBrush)
+//                canvas.drawText("${((x-widthPad)*widthMultiplier).toInt()},${((y-heightPad)*heightMultiplier).toInt()}",x+1f,y+30f,textPaintBrush)
+//            }
+//        }
+
+//        canvas.drawLine(0f,10f,widthPad,10f,redPaintBrush)
+//        canvas.drawLine(0f,20f,100f,20f,redPaintBrush)
+//        canvas.drawLine(0f,50f,width.toFloat(),50f,redPaintBrush)
 
         if(curBitmap != null && !curBitmap!!.isRecycled && fullRect != null) {
             canvas.drawBitmap(curBitmap!!,null, fullRect!!,null);
@@ -207,19 +230,26 @@ class MyImagePlotter : View {
         bluePaintBrush.color = Color.BLUE
         whitePaintBrush.color = Color.WHITE
         grayPaintBrush.color = Color.GRAY
+
+        textPaintBrush.color = Color.BLACK;
+        textPaintBrush.style = Paint.Style.FILL;
+        textPaintBrush.textSize = 20f;
+
         initAll()
+
     }
 
     private var widthMultiplier = 1f
     private var heightMultiplier = 1f
     fun setScreenInfo(serverWidth:Float, serverHeight:Float) {
         post {
-            val padPercent = 0.05f
+            val padPercentWidth = 0.05f
+            val padPercentHeight = 0.1f
 
-            val curWidth = (1 - padPercent) * width
+            val curWidth = (1 - padPercentWidth) * width
             val widthExcluded = (width - curWidth)
 
-            val curHeight = (1 - padPercent) * height
+            val curHeight = (1 - padPercentHeight) * height
             val heightExcluded = (height - curHeight)
 
             val widthRatio = curWidth / serverWidth
