@@ -31,18 +31,11 @@ class MyImagePlotter : View {
     private var widthPad = 0f
     private var heightPad = 0f
 
-    private var imageWH = Pair(0,0)
-
     private val screenBoundary = Path()
-    private val dummyPath = Path()
-    
-    private val pathPixels = ArrayList<Path>()
-    private val colorPixels = ArrayList<Char>()
 
     var plotListener : ImagePlotListener? = null
 
-    var isDrawingRequested = false
-    var isDrawn = false
+    private var isDrawingRequested = false
     private var fullRect:RectF? = null
     private var curBitmap:Bitmap? = null
 
@@ -63,8 +56,6 @@ class MyImagePlotter : View {
 
 
     @SuppressLint("ClickableViewAccessibility")
-
-
     @Override
     public
     override fun onTouchEvent(event: MotionEvent?): Boolean {
@@ -77,8 +68,6 @@ class MyImagePlotter : View {
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
-//        if( !isDrawingRequested ) return
-
         canvas.save()
         canvas.scale(scaleFactor, scaleFactor, myPivotX, myPivotY)
 
@@ -88,20 +77,6 @@ class MyImagePlotter : View {
             canvas.drawBitmap(curBitmap!!,null, fullRect!!,null);
         }
 
-        /*for(i in pathPixels.indices){
-            canvas.drawPath(
-                pathPixels[i],
-                if ( colorPixels[i] == 'R' ) redPaintBrush
-                else if ( colorPixels[i] == 'G' ) greenPaintBrush
-                else if ( colorPixels[i] == 'B' ) bluePaintBrush
-                else whitePaintBrush
-            )
-        }
-
-        canvas.restore()*/
-
-  /*      isDrawn = true
-        isDrawingRequested = false*/
     }
 
     private fun initializeAll() {
@@ -123,10 +98,6 @@ class MyImagePlotter : View {
         bluePaintBrush.color = Color.BLUE
         whitePaintBrush.color = Color.WHITE
         grayPaintBrush.color = Color.GRAY
-    }
-
-    fun setImageResolution(widthPx:Int, heightPx:Int){
-        this.imageWH = Pair(widthPx,heightPx)
     }
 
     fun setScreenInfo(width:Float, height:Float) {
@@ -156,50 +127,6 @@ class MyImagePlotter : View {
         }
     }
 
-    private fun drawPixel(){
-        val startTime = System.currentTimeMillis()
-
-        val pxWidth = this.boundaryWidth / imageWH.first
-        val pxHeight = this.boundaryHeight / imageWH.second
-
-        pathPixels.clear()
-        colorPixels.clear()
-
-        for(i in 0 until imageWH.second){
-            for(j in 0 until imageWH.first) {
-                
-                val topX = widthPad + (j * pxWidth)
-                val topY = heightPad + (i * pxHeight)
-                
-                val path = Path()
-                
-                path.moveTo(topX,topY) // top left
-                
-                path.lineTo(topX+pxWidth,topY) // top right
-                path.lineTo(topX+pxWidth,topY + pxHeight) // bottom right
-                path.lineTo(topX,topY+pxHeight) // bottom left
-
-                path.lineTo(topX,topY) // top left
-
-                pathPixels.add(path)
-                colorPixels.add(
-                    if ( (i+j) % 3 == 0) 'R'
-                    else if ( (i+j) % 3 == 1) 'G'
-                    else 'B'
-                )
-            }
-        }
-
-        val endTime = System.currentTimeMillis()
-
-        val dif = (endTime - startTime)
-
-        plotListener?.onMessageFound("Took $dif ms")
-
-        isDrawingRequested = true
-        invalidate()
-    }
-
     private fun updateBoundary(width: Float, height: Float){
         val extra = 20f
 
@@ -217,7 +144,7 @@ class MyImagePlotter : View {
         invalidate()
     }
 
-    var tempPrev:Bitmap? = null
+    private var tempPrev:Bitmap? = null
     fun updateFrame(bitmap: Bitmap){
         if(scalingInProgress) {
             return
@@ -227,17 +154,6 @@ class MyImagePlotter : View {
         curBitmap = bitmap
         //tempPrev?.recycle()
 
-        isDrawingRequested = true
-        invalidate()
-    }
-
-    fun updateFrame(coloredPixel:Array<CharArray>){
-        for(i in 0 until imageWH.second){
-            val row = i * imageWH.first
-            for(j in 0 until imageWH.first) {
-                colorPixels[row + j] = coloredPixel[i][j]
-            }
-        }
         isDrawingRequested = true
         invalidate()
     }
