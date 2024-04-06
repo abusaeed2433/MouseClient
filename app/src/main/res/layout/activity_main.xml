@@ -4,42 +4,56 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity" >
+    tools:context=".MainActivity">
 
-    <ProgressBar
-        android:visibility="invisible"
-        android:id="@+id/progressBar"
-        android:layout_width="wrap_content"
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/textInputLayout"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:elevation="7dp"
-        app:layout_constraintBottom_toBottomOf="@+id/buttonConnect"
-        app:layout_constraintEnd_toEndOf="@+id/buttonConnect"
-        app:layout_constraintStart_toStartOf="@+id/buttonConnect"
-        app:layout_constraintTop_toTopOf="@+id/buttonConnect" />
-
-    <EditText
-        android:id="@+id/editTextIP"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:hint="@string/_192_168_0_104"
-        app:layout_constraintBottom_toTopOf="@+id/progressBar"
+        style="@style/editTextOutlineStyle"
+        android:layout_margin="16dp"
+        app:layout_constraintBottom_toTopOf="@+id/buttonConnect"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintWidth_percent="0.8" />
+        app:layout_constraintWidth_percent="0.8">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/editTextIP"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:autofillHints="none"
+            android:hint="@string/enter_ip_of_server"
+            tools:ignore="TextFields" />
+
+    </com.google.android.material.textfield.TextInputLayout>
 
     <android.widget.Button
         android:id="@+id/buttonConnect"
         android:layout_width="0dp"
         android:layout_height="50dp"
-        app:layout_constraintWidth_percent="0.7"
         android:background="@drawable/button_ripple"
+        android:backgroundTint="#1490C8"
+        android:gravity="center"
         android:text="@string/connect"
         android:textColor="@color/white"
-        android:gravity="center"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/textInputLayout"
+        app:layout_constraintWidth_percent="0.7" />
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:elevation="7dp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/buttonConnect"
+        app:layout_constraintEnd_toEndOf="@+id/buttonConnect"
+        app:layout_constraintStart_toStartOf="@+id/buttonConnect"
+        app:layout_constraintTop_toTopOf="@+id/buttonConnect" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

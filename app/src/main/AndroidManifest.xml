@@ -47,7 +47,9 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:noHistory="true" >
+            android:noHistory="true"
+            android:theme="@style/Theme.MouseClient">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
