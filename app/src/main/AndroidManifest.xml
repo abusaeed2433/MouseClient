@@ -32,7 +32,7 @@
         </activity>
 
         <activity
-            android:name=".homepage.view.HomePage"
+            android:name=".mouse_controller.view.MouseControllerPage"
             android:exported="true"
             android:theme="@style/fullScreenActivity"
             android:screenOrientation="landscape"

@@ -1,4 +1,4 @@
-package com.unknownn.mouseclient.homepage.model
+package com.unknownn.mouseclient.mouse_controller.model
 
 import java.io.Serializable
 

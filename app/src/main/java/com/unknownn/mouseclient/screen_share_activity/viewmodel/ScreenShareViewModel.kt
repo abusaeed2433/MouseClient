@@ -5,11 +5,9 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Handler
 import android.os.Looper
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import com.unknownn.mouseclient.MainActivity
-import com.unknownn.mouseclient.homepage.model.MyTouchPad
-import com.unknownn.mouseclient.homepage.viewmodel.HomePageViewModel
+import com.unknownn.mouseclient.mouse_controller.viewmodel.HomePageViewModel
 import com.unknownn.mouseclient.screen_share_activity.model.ScreenShareListener
 import java.util.concurrent.Executors
 

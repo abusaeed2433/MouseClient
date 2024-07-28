@@ -1,4 +1,4 @@
-package com.unknownn.mouseclient.homepage.model
+package com.unknownn.mouseclient.mouse_controller.model
 
 import android.annotation.SuppressLint
 import android.content.Context

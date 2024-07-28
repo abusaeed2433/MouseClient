@@ -15,7 +15,7 @@ import android.view.MotionEvent
 import android.view.ScaleGestureDetector
 import android.view.ScaleGestureDetector.SimpleOnScaleGestureListener
 import android.view.View
-import com.unknownn.mouseclient.homepage.model.MyTouchPad
+import com.unknownn.mouseclient.mouse_controller.model.MyTouchPad
 import java.util.concurrent.Executors
 import kotlin.math.abs
 import kotlin.math.max

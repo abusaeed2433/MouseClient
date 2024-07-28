@@ -3,7 +3,6 @@ package com.unknownn.mouseclient;
 import static com.unknownn.mouseclient.classes.UtilityKt.showSafeToast;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 
@@ -12,7 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.unknownn.mouseclient.classes.DataSaver;
 import com.unknownn.mouseclient.classes.WebSocketClient;
 import com.unknownn.mouseclient.databinding.ActivityMainBinding;
-import com.unknownn.mouseclient.homepage.view.HomePage;
+import com.unknownn.mouseclient.mouse_controller.view.MouseControllerPage;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -55,13 +54,13 @@ public class MainActivity extends AppCompatActivity {
         if(socketClient == null){
             if(ip.isEmpty()) {
                 socketClient = new WebSocketClient(() -> {
-                    startActivity(new Intent(MainActivity.this, HomePage.class));
+                    startActivity(new Intent(MainActivity.this, MouseControllerPage.class));
                     overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                 });
             }
             else{
                 socketClient = new WebSocketClient(ip,4275,() -> {
-                    startActivity(new Intent(MainActivity.this, HomePage.class));
+                    startActivity(new Intent(MainActivity.this, MouseControllerPage.class));
                     overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                 });
             }

@@ -1,14 +1,14 @@
-package com.unknownn.mouseclient.homepage.viewmodel
+package com.unknownn.mouseclient.mouse_controller.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import com.unknownn.mouseclient.MainActivity
 import com.unknownn.mouseclient.R
-import com.unknownn.mouseclient.homepage.model.DataListener
-import com.unknownn.mouseclient.homepage.model.MyTouchPad
+import com.unknownn.mouseclient.mouse_controller.model.DataListener
+import com.unknownn.mouseclient.mouse_controller.model.MyTouchPad
 import com.unknownn.mouseclient.screen_share_activity.model.ScreenShareListener
-import com.unknownn.mouseclient.homepage.model.SharedCommand
+import com.unknownn.mouseclient.mouse_controller.model.SharedCommand
 
 open class HomePageViewModel(application: Application):AndroidViewModel(application) {
     private var application:Application
