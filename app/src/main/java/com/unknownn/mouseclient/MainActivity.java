@@ -11,7 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.unknownn.mouseclient.classes.DataSaver;
 import com.unknownn.mouseclient.classes.WebSocketClient;
 import com.unknownn.mouseclient.databinding.ActivityMainBinding;
-import com.unknownn.mouseclient.mouse_controller.view.MouseControllerPage;
+import com.unknownn.mouseclient.homepage.view.HomePage;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void setClickListener(){
         binding.buttonConnect.setOnClickListener(view -> {
-            String ip = binding.editTextIP.getText().toString().trim();
+            String ip = String.valueOf(binding.editTextIP.getText()).trim();
             connect(ip);
             getDataSaver().savePreviousIp(ip);
         });
@@ -54,13 +54,13 @@ public class MainActivity extends AppCompatActivity {
         if(socketClient == null){
             if(ip.isEmpty()) {
                 socketClient = new WebSocketClient(() -> {
-                    startActivity(new Intent(MainActivity.this, MouseControllerPage.class));
+                    startActivity(new Intent(MainActivity.this, HomePage.class));
                     overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                 });
             }
             else{
                 socketClient = new WebSocketClient(ip,4275,() -> {
-                    startActivity(new Intent(MainActivity.this, MouseControllerPage.class));
+                    startActivity(new Intent(MainActivity.this, HomePage.class));
                     overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                 });
             }
