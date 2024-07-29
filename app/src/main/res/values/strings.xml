@@ -15,5 +15,6 @@
     <string name="channel_name">Main channel</string>
     <string name="notification_title">Running</string>
     <string name="notification_desc">Looking for new data from pc</string>
+    <string name="stop_service">Stop Service</string>
 
 </resources>

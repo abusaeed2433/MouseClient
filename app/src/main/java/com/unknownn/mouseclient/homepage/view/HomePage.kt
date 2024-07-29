@@ -38,6 +38,10 @@ class HomePage : AppCompatActivity() {
             showSafeToast(this,"Not ready yet")
             MainActivity.socketClient?.shareClipText("sharing from phone")
         }
+
+        binding.buttonExit.setOnClickListener{
+            stopService( Intent(this, MyForeGroundService::class.java) )
+        }
     }
 
     private fun startMyService(){
@@ -79,7 +83,7 @@ class HomePage : AppCompatActivity() {
         val bufferSize = 1024
         val buffer = ByteArray(bufferSize)
 
-        var len = 0
+        var len: Int
         while ((inputStream.read(buffer).also { len = it }) != -1) {
             byteBuffer.write(buffer, 0, len)
         }
