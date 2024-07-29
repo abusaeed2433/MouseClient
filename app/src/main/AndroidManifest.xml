@@ -50,8 +50,8 @@
         <activity
             android:name=".main_activity.view.MainActivity"
             android:exported="true"
-            android:noHistory="true"
             android:theme="@style/Theme.MouseClient">
+
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />

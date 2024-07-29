@@ -38,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
     private IpAdapter adapter = null;
     private void initRV(){
         adapter = new IpAdapter(ip -> viewModel.connect(ip));
+        binding.rvRecentIps.setAdapter(adapter);
     }
 
     private void setClickListener(){
@@ -48,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void observeViewModel(){
-        viewModel.getButtonText().observe(this, s -> binding.buttonConnect.setText(s));
+        viewModel.getButtonText().observe(this, s -> binding.buttonConnect.setText( ((s==null) ? "Connect" : s) ));
 
         viewModel.getProgressBar().observe(this, show -> {
             if(show == null) return;
@@ -56,7 +57,9 @@ public class MainActivity extends AppCompatActivity {
             binding.progressBar.setVisibility( (show ? View.VISIBLE : View.INVISIBLE));
         });
 
-        viewModel.getIps().observe(this, strings -> adapter.submitList(strings));
+        viewModel.getIps().observe(this, strings -> {
+            adapter.submitList(strings);
+        });
 
         viewModel.getActivitySwitch().observe(this, aBoolean -> {
             if(aBoolean == null || !aBoolean) return;

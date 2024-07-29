@@ -21,7 +21,7 @@ class DataSaver(val context:Context) {
 
         }
 
-        pairs.sortWith { p0, p1 -> p0.second.compareTo(p1.second) }
+        pairs.sortWith { p0, p1 -> p1.second.compareTo(p0.second) }
 
         for(pair in pairs){
             list.add( pair.first )
@@ -36,7 +36,7 @@ class DataSaver(val context:Context) {
         val sp: SharedPreferences = context.getSharedPreferences("sp", Context.MODE_PRIVATE)
 
         val editor = sp.edit()
-        if(!sp.contains(ip)){
+        if(!sp.contains("${ip}_count")){
             val size = sp.getInt("size",0)
             editor.putString("${size+1}",ip)
             editor.putInt("size",size+1)

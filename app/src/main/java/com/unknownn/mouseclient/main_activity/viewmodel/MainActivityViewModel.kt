@@ -1,6 +1,8 @@
 package com.unknownn.mouseclient.main_activity.viewmodel
 
 import android.app.Application
+import android.os.Handler
+import android.os.Looper
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import com.unknownn.mouseclient.classes.DataSaver
@@ -16,8 +18,18 @@ class MainActivityViewModel(private val application: Application): AndroidViewMo
     val progressBar:MutableLiveData<Boolean> = MutableLiveData(null)
     val activitySwitch:MutableLiveData<Boolean> = MutableLiveData(null)
 
+
+    init {
+        readIps()
+    }
+
+    private fun readIps(){
+        this.ips.value = getDataSaver().getPreviousIps()
+    }
+
     fun connect(ip: String) {
         getDataSaver().saveIp(ip)
+        readIps()
 
         buttonText.value = ""
         progressBar.value = true
@@ -26,7 +38,12 @@ class MainActivityViewModel(private val application: Application): AndroidViewMo
 
     private fun startWebsocketClient(ip: String) {
         if (MainActivity.socketClient != null) return
-        MainActivity.socketClient = WebSocketClient(ip, 4275) { activitySwitch.value = true }
+
+        MainActivity.socketClient = WebSocketClient(ip, 4275) {
+            Handler(Looper.getMainLooper()).post {
+                activitySwitch.value = true
+            }
+        }
     }
 
     private fun getDataSaver(): DataSaver {

@@ -53,7 +53,7 @@ public class WebSocketClient {
         service.execute(() -> {
             while (true) {
                 try{
-                    final Socket soc = new Socket(host,port);
+                    Socket soc = new Socket(host,port);
 
                     System.out.println("Websocket reading output stream");
 
