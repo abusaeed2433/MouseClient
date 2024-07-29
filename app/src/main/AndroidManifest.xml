@@ -4,8 +4,8 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
@@ -20,41 +20,45 @@
         android:theme="@style/Theme.MouseClient"
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
+        <activity
+            android:name=".FrontActivity"
+            android:exported="true" >
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
 
         <service
             android:name=".service.MyForeGroundService"
+            android:exported="false"
             android:foregroundServiceType="dataSync"
-            tools:node="merge"
-            android:exported="false">
-
-        </service>
+            tools:node="merge"/>
 
         <activity
             android:name=".homepage.view.HomePage"
-            android:exported="true"/>
-
+            android:exported="true" />
         <activity
             android:name=".screen_share_activity.view.ScreenShareActivity"
             android:exported="true"
             android:screenOrientation="landscape"
             android:theme="@style/fullScreenActivity"
-            tools:ignore="DiscouragedApi"/>
-
+            tools:ignore="DiscouragedApi" />
         <activity
             android:name=".mouse_controller.view.MouseControllerPage"
             android:exported="true"
             android:screenOrientation="landscape"
             android:theme="@style/fullScreenActivity"
-            tools:ignore="DiscouragedApi"/>
-
+            tools:ignore="DiscouragedApi" />
         <activity
             android:name=".main_activity.view.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.MouseClient">
-
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data android:mimeType="application/*" />
                 <data android:mimeType="audio/*" />
                 <data android:mimeType="image/*" />
@@ -62,10 +66,8 @@
                 <data android:mimeType="multipart/*" />
                 <data android:mimeType="text/*" />
                 <data android:mimeType="video/*" />
-
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
         </activity>
     </application>
 
