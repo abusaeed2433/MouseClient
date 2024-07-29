@@ -10,10 +10,10 @@ import android.os.Looper
 import android.provider.MediaStore
 import androidx.appcompat.app.AppCompatActivity
 import androidx.documentfile.provider.DocumentFile
-import com.unknownn.mouseclient.main_activity.view.MainActivity
 import com.unknownn.mouseclient.classes.WebSocketClient.TextAndFileListener
 import com.unknownn.mouseclient.classes.showSafeToast
 import com.unknownn.mouseclient.databinding.ActivityHomePageBinding
+import com.unknownn.mouseclient.main_activity.view.MainActivity
 import com.unknownn.mouseclient.service.MyForeGroundService
 import java.io.ByteArrayOutputStream
 import java.io.IOException
@@ -31,7 +31,7 @@ class HomePage : AppCompatActivity() {
         binding = ActivityHomePageBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        checkShareRequest()
+        processPassedData()
         startMyService()
         setClickListener()
         addObserver()
@@ -56,20 +56,18 @@ class HomePage : AppCompatActivity() {
         },5000)
     }
 
-    private fun checkShareRequest() {
-        if (intent?.action == Intent.ACTION_SEND && intent.type == "text/plain") {
-            intent.getStringExtra(Intent.EXTRA_TEXT)?.let {
-                showSafeToast(this, it)
-                MainActivity.socketClient?.shareClipText(it)
-            }
-            return
+    private fun processPassedData() {
+        val text = intent.getStringExtra("text")
+
+        if(text != null){
+            MainActivity.socketClient.shareClipText(text)
         }
 
-        val bundle = intent.extras ?: return
-        val dataUri = bundle[Intent.EXTRA_STREAM] as Uri? ?: return
+        val strUri = intent.getStringExtra("data_uri") ?: return
+
+        val dataUri:Uri = Uri.parse(strUri)
 
         val nameWithExtension = DocumentFile.fromSingleUri(this, dataUri)?.name ?: return
-        showSafeToast(this,nameWithExtension)
 
         try {
             val inputStream = contentResolver.openInputStream(dataUri) ?: return

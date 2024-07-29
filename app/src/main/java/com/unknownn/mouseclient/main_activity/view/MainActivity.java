@@ -1,23 +1,19 @@
 package com.unknownn.mouseclient.main_activity.view;
 
-import static com.unknownn.mouseclient.classes.UtilityKt.showSafeToast;
-
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.unknownn.mouseclient.classes.DataSaver;
 import com.unknownn.mouseclient.classes.WebSocketClient;
 import com.unknownn.mouseclient.databinding.ActivityMainBinding;
 import com.unknownn.mouseclient.homepage.view.HomePage;
 import com.unknownn.mouseclient.main_activity.viewmodel.MainActivityViewModel;
 
-import java.util.List;
+import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -36,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
         initRV();
         observeViewModel();
         setClickListener();
+        checkShareRequest();
     }
 
     private IpAdapter adapter = null;
@@ -67,6 +64,32 @@ public class MainActivity extends AppCompatActivity {
             startActivity( new Intent(MainActivity.this, HomePage.class));
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
         });
+    }
+
+    private void checkShareRequest() {
+        if(MainActivity.socketClient == null) return;
+
+        final Intent intent = getIntent();
+        final Intent myIntent = new Intent(this, HomePage.class);
+
+        if (Objects.equals(intent.getAction(), Intent.ACTION_SEND) && Objects.equals(intent.getType(), "text/plain")) {
+            String text = intent.getStringExtra(Intent.EXTRA_TEXT);
+            if(text == null) return;
+
+            myIntent.putExtra("text",text);
+        }
+        else {
+            Bundle bundle = intent.getExtras();
+            if (bundle == null) return;
+
+            Uri dataUri = (Uri) bundle.get(Intent.EXTRA_STREAM);
+            if(dataUri == null) return;
+
+            myIntent.putExtra("data_uri", dataUri.toString());
+        }
+
+        startActivity(myIntent);
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
     }
 
 }

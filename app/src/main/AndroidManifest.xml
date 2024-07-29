@@ -31,23 +31,7 @@
 
         <activity
             android:name=".homepage.view.HomePage"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.SEND" />
-                <category android:name="android.intent.category.DEFAULT" />
-
-                <data android:mimeType="application/*" />
-                <data android:mimeType="audio/*" />
-                <data android:mimeType="image/*" />
-                <data android:mimeType="message/*" />
-                <data android:mimeType="multipart/*" />
-                <data android:mimeType="text/*" />
-                <data android:mimeType="video/*" />
-
-<!--                <action android:name="android.intent.action.MAIN" />-->
-<!--                <category android:name="android.intent.category.LAUNCHER" />-->
-            </intent-filter>
-        </activity>
+            android:exported="true"/>
 
         <activity
             android:name=".screen_share_activity.view.ScreenShareActivity"
@@ -69,8 +53,17 @@
             android:noHistory="true"
             android:theme="@style/Theme.MouseClient">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="application/*" />
+                <data android:mimeType="audio/*" />
+                <data android:mimeType="image/*" />
+                <data android:mimeType="message/*" />
+                <data android:mimeType="multipart/*" />
+                <data android:mimeType="text/*" />
+                <data android:mimeType="video/*" />
 
+                <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
