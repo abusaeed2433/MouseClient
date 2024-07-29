@@ -3,15 +3,14 @@ package com.unknownn.mouseclient.mouse_controller.viewmodel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
-import com.unknownn.mouseclient.MainActivity
+import com.unknownn.mouseclient.main_activity.view.MainActivity
 import com.unknownn.mouseclient.R
 import com.unknownn.mouseclient.mouse_controller.model.DataListener
 import com.unknownn.mouseclient.mouse_controller.model.MyTouchPad
 import com.unknownn.mouseclient.screen_share_activity.model.ScreenShareListener
 import com.unknownn.mouseclient.mouse_controller.model.SharedCommand
 
-open class HomePageViewModel(application: Application):AndroidViewModel(application) {
-    private var application:Application
+open class MouseControllerViewModel(private val application: Application):AndroidViewModel(application) {
 
     private lateinit var touchListener: MyTouchPad.TouchPadListener
     private lateinit var screenShareListener: ScreenShareListener
@@ -20,7 +19,6 @@ open class HomePageViewModel(application: Application):AndroidViewModel(applicat
     val showMessage:MutableLiveData<String?> = MutableLiveData(null)
 
     init {
-        this.application = application
         initTouchListeners()
     }
 

@@ -64,7 +64,7 @@
             tools:ignore="DiscouragedApi"/>
 
         <activity
-            android:name=".MainActivity"
+            android:name=".main_activity.view.MainActivity"
             android:exported="true"
             android:noHistory="true"
             android:theme="@style/Theme.MouseClient">

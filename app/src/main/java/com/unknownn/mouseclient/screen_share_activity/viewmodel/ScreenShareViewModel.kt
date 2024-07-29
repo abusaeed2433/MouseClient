@@ -6,12 +6,12 @@ import android.graphics.BitmapFactory
 import android.os.Handler
 import android.os.Looper
 import androidx.lifecycle.MutableLiveData
-import com.unknownn.mouseclient.MainActivity
-import com.unknownn.mouseclient.mouse_controller.viewmodel.HomePageViewModel
+import com.unknownn.mouseclient.main_activity.view.MainActivity
+import com.unknownn.mouseclient.mouse_controller.viewmodel.MouseControllerViewModel
 import com.unknownn.mouseclient.screen_share_activity.model.ScreenShareListener
 import java.util.concurrent.Executors
 
-class ScreenShareViewModel(application: Application):HomePageViewModel(application) {
+class ScreenShareViewModel(application: Application):MouseControllerViewModel(application) {
     private var application:Application
 
     val screenSizeLD: MutableLiveData<Pair<Float, Float>?> = MutableLiveData(null)

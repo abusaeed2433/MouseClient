@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".main_activity.view.MainActivity">
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/textInputLayout"
@@ -12,7 +12,6 @@
         android:layout_height="wrap_content"
         style="@style/editTextOutlineStyle"
         android:layout_margin="16dp"
-        app:layout_constraintBottom_toTopOf="@+id/buttonConnect"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
@@ -32,13 +31,13 @@
     <android.widget.Button
         android:id="@+id/buttonConnect"
         android:layout_width="0dp"
-        android:layout_height="50dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         android:background="@drawable/button_ripple"
         android:backgroundTint="#1490C8"
         android:gravity="center"
         android:text="@string/connect"
         android:textColor="@color/white"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
@@ -55,5 +54,20 @@
         app:layout_constraintEnd_toEndOf="@+id/buttonConnect"
         app:layout_constraintStart_toStartOf="@+id/buttonConnect"
         app:layout_constraintTop_toTopOf="@+id/buttonConnect" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvRecentIps"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_margin="12dp"
+        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+        app:spanCount="2"
+        android:orientation="vertical"
+        tools:listitem="@layout/each_ip_layout"
+        tools:itemCount="7"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/buttonConnect" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

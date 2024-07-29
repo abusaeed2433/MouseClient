@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import com.unknownn.mouseclient.MainActivity
+import com.unknownn.mouseclient.main_activity.view.MainActivity
 import com.unknownn.mouseclient.screen_share_activity.model.MyImagePlotter
 import com.unknownn.mouseclient.classes.showSafeToast
 import com.unknownn.mouseclient.databinding.ActivityScreenShareBinding

@@ -8,12 +8,12 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.unknownn.mouseclient.screen_share_activity.view.ScreenShareActivity
 import com.unknownn.mouseclient.databinding.ActivityMouseControllerPageBinding
-import com.unknownn.mouseclient.mouse_controller.viewmodel.HomePageViewModel
+import com.unknownn.mouseclient.mouse_controller.viewmodel.MouseControllerViewModel
 
 class MouseControllerPage : AppCompatActivity() {
 
     private lateinit var binding:ActivityMouseControllerPageBinding
-    private val viewmodel:HomePageViewModel by viewModels()
+    private val viewmodel:MouseControllerViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

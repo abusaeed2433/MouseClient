@@ -3,7 +3,6 @@ package com.unknownn.mouseclient.homepage.view
 import android.content.ContentValues
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
@@ -11,7 +10,7 @@ import android.os.Looper
 import android.provider.MediaStore
 import androidx.appcompat.app.AppCompatActivity
 import androidx.documentfile.provider.DocumentFile
-import com.unknownn.mouseclient.MainActivity
+import com.unknownn.mouseclient.main_activity.view.MainActivity
 import com.unknownn.mouseclient.classes.WebSocketClient.TextAndFileListener
 import com.unknownn.mouseclient.classes.showSafeToast
 import com.unknownn.mouseclient.databinding.ActivityHomePageBinding

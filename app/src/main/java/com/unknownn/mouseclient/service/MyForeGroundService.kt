@@ -6,7 +6,7 @@ import android.content.pm.ServiceInfo
 import android.os.IBinder
 import android.widget.Toast
 import androidx.core.app.ServiceCompat
-import com.unknownn.mouseclient.MainActivity
+import com.unknownn.mouseclient.main_activity.view.MainActivity
 import com.unknownn.mouseclient.notification.NotificationsHelper
 import com.unknownn.mouseclient.service.model.ClipManager
 import java.util.concurrent.ExecutorService
