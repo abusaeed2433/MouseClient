@@ -29,6 +29,7 @@ public class WebSocketClient {
 
     private DataListener dataListener = null;
     private ScreenShareListener screenShareListener = null;
+    private TextAndFileListener textAndFileListener = null;
     private String host = "192.168.0.104";
     private int port = 4275;
 
@@ -46,6 +47,7 @@ public class WebSocketClient {
     }
 
     private DataInputStream inputStream = null;
+    @SuppressWarnings("all")
     private void createManualClient(){
         final ExecutorService service = Executors.newFixedThreadPool(2);
         service.execute(() -> {
@@ -75,6 +77,7 @@ public class WebSocketClient {
 
                     if(messageID == Type.CLIP_TEXT.id){
                         byte[] bytes = readBytes(inputStream);
+                        textAndFileListener.onTextReceived(bytes);
                     }
                     else if(messageID == Type.SCREEN_INFO.id){
                         final byte[] bytes = readBytes(inputStream);
@@ -98,6 +101,12 @@ public class WebSocketClient {
                     else if(messageID == Type.SCREEN_SHARE.id){
                         byte[] bytesImage = readBytes(inputStream);
                         screenShareListener.onCommandReceived(bytesImage);
+                    }
+                    else if(messageID == Type.FILE.id){
+                        byte[] bytesName = readBytes(inputStream);
+                        byte[] bytesContent = readBytes(inputStream);
+
+                        textAndFileListener.onFileReceived(bytesName, bytesContent);
                     }
 
                 }catch (Exception e){
@@ -139,6 +148,11 @@ public class WebSocketClient {
     public void setScreenShareListener(ScreenShareListener shareListener){
         this.screenShareListener = shareListener;
     }
+
+    public void setTextAndFileListener(TextAndFileListener textAndFileListener) {
+        this.textAndFileListener = textAndFileListener;
+    }
+
     public void clearScreenShareListener(){
         this.screenShareListener = null;
     }
@@ -237,5 +251,9 @@ public class WebSocketClient {
 
     public interface SocketListener{
         void onConnected();
+    }
+    public interface TextAndFileListener{
+        void onTextReceived(byte[] bytes);
+        void onFileReceived(byte[] bytesName, byte[] bytesContent);
     }
 }

@@ -1,21 +1,25 @@
 package com.unknownn.mouseclient.homepage.view
 
+import android.content.ContentValues
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.os.Handler
 import android.os.Looper
+import android.provider.MediaStore
 import androidx.appcompat.app.AppCompatActivity
 import androidx.documentfile.provider.DocumentFile
 import com.unknownn.mouseclient.MainActivity
+import com.unknownn.mouseclient.classes.WebSocketClient.TextAndFileListener
 import com.unknownn.mouseclient.classes.showSafeToast
 import com.unknownn.mouseclient.databinding.ActivityHomePageBinding
 import com.unknownn.mouseclient.service.MyForeGroundService
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.io.InputStream
-
-
+import java.nio.charset.StandardCharsets
 
 
 class HomePage : AppCompatActivity() {
@@ -31,6 +35,7 @@ class HomePage : AppCompatActivity() {
         checkShareRequest()
         startMyService()
         setClickListener()
+        addObserver()
     }
 
     private fun setClickListener(){
@@ -88,6 +93,39 @@ class HomePage : AppCompatActivity() {
             byteBuffer.write(buffer, 0, len)
         }
         return byteBuffer.toByteArray()
+    }
+
+    private val mHandler = Handler(Looper.getMainLooper())
+    private fun addObserver(){
+        if(MainActivity.socketClient == null) return
+
+        MainActivity.socketClient.setTextAndFileListener(object : TextAndFileListener{
+            override fun onTextReceived(bytes: ByteArray) {
+                mHandler.post { binding.textView.text = String(bytes, StandardCharsets.UTF_8) }
+            }
+
+            override fun onFileReceived(bytesName: ByteArray, bytesContent: ByteArray) {
+                val nameWithExtension = String(bytesName, StandardCharsets.UTF_8)
+                saveFile(nameWithExtension, bytesContent)
+            }
+        })
+    }
+
+    private fun saveFile(name:String, bytes:ByteArray){
+        val collection = MediaStore.Downloads.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+
+        val values = ContentValues()
+        values.put(MediaStore.MediaColumns.DISPLAY_NAME, name)
+        //values.put(MediaStore.MediaColumns.MIME_TYPE, "application/pdf")
+        values.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
+
+        val fileUri: Uri = contentResolver.insert(collection,values) ?: return
+
+        try {
+            contentResolver.openOutputStream(fileUri).use { outputStream -> outputStream?.write(bytes) }
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
     }
 
 }
