@@ -68,27 +68,27 @@ open class HomePageViewModel(application: Application):AndroidViewModel(applicat
         touchListener = object : MyTouchPad.TouchPadListener{
             override fun onMoveRequest(dx: Float, dy: Float) {
                 //println("Sent requested with $dx and $dy")
-                val command = SharedCommand(SharedCommand.Type.MOVE,dx,dy)
+                val command = SharedCommand(SharedCommand.Type.MOVE,null, dx,dy)
                 sendData(command)
             }
 
             override fun onSingleClickRequest() {
-                val command = SharedCommand(SharedCommand.Type.SINGLE_CLICK)
+                val command = SharedCommand(SharedCommand.Type.SINGLE_CLICK,null)
                 sendData(command)
             }
 
             override fun onMoveThenClick(x: Float, y: Float) {
-                val command = SharedCommand(SharedCommand.Type.MOVE_THEN_CLICK, x,y)
+                val command = SharedCommand(SharedCommand.Type.MOVE_THEN_CLICK,null, x,y)
                 sendData(command)
             }
 
             override fun onDoubleClickRequest() {
-                val command = SharedCommand(SharedCommand.Type.DOUBLE_CLICK)
+                val command = SharedCommand(SharedCommand.Type.DOUBLE_CLICK,null)
                 sendData(command)
             }
 
             override fun onScrollRequest(dy: Float) {
-                val command = SharedCommand(SharedCommand.Type.SCROLL,dy)
+                val command = SharedCommand(SharedCommand.Type.SCROLL,null,dy)
                 sendData(command)
             }
         }

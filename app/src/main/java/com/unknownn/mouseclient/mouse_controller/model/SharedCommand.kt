@@ -2,7 +2,7 @@ package com.unknownn.mouseclient.mouse_controller.model
 
 import java.io.Serializable
 
-class SharedCommand(val type: Type, vararg args:Float): Serializable {
+class SharedCommand(val type:Type, val text:String?, vararg args:Float): Serializable {
 
     var byteArrayOfImage:ByteArray? = null
 
@@ -21,6 +21,7 @@ class SharedCommand(val type: Type, vararg args:Float): Serializable {
         SCREEN_INFO,
         SCREEN_INFO_REQUEST,
         SCREEN_SHARE_START_REQUEST,
-        SCREEN_SHARE_STOP_REQUEST
+        SCREEN_SHARE_STOP_REQUEST,
+        CLIPBOARD_FROM_PHONE
     }
 }

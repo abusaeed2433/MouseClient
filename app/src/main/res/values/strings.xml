@@ -9,4 +9,11 @@
     <string name="_192_168_0_104">192.168.0.104</string>
     <string name="received_256">Received: 256</string>
     <string name="enter_ip_of_server">Enter IP shown in pc</string>
+    <string name="text_copied_in_pc">Text copied in pc</string>
+    <string name="files_copied_in_pc">Files copied in pc</string>
+    <string name="download">Download</string>
+    <string name="channel_name">Main channel</string>
+    <string name="notification_title">Running</string>
+    <string name="notification_desc">Looking for new data from pc</string>
+
 </resources>

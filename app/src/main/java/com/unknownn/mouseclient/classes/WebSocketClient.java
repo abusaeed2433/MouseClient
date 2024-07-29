@@ -10,10 +10,18 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.util.Stack;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class WebSocketClient {
+
+    private static final int CHUNK_SIZE = 4096;
+    private static final int BYTE_START_CODE = 5555;
+    private static final int BYTE_END_CODE = 7777;
 
     private DataOutputStream outputStream = null;
     private final SocketListener socketListener;
@@ -71,34 +79,38 @@ public class WebSocketClient {
             int screenShareID = -1357; // Don't change here, change in desktop also
             while (true) {
                 try {
-                    int totalBytesOrId = dataInputStream.readInt();
+                    int messageID = dataInputStream.readInt();
 
-                    if(totalBytesOrId == screenShareID){
-                        int width = dataInputStream.readInt();
-                        int height = dataInputStream.readInt();
+                    if(messageID == Type.CLIP_TEXT.id){
+                        byte[] bytes = readBytes(dataInputStream);
+                    }
+                    else if(messageID == Type.SCREEN_INFO.id){
+                        final byte[] bytes = readBytes(dataInputStream);
+                        final String str = new String(bytes, StandardCharsets.UTF_8);
+
+                        // "$width,$height"
+
+                        final String regex = "(\\d+),(\\d+)";
+                        final Pattern pattern = Pattern.compile(regex);
+                        final Matcher matcher = pattern.matcher(str);
+
+                        String w = matcher.group(1);
+                        String h = matcher.group(2);
+
+                        if(w == null || h == null) return;
+
+                        int width = Integer.parseInt(w);
+                        int height = Integer.parseInt(h);
+
                         screenShareListener.onScreenSizeReceived(width,height);
+
                     }
-                    else {
+                    else if(messageID == Type.SCREEN_SHARE.id){
+                        byte[] bytesImage = readBytes(dataInputStream);
 
-                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                        byte[] buffer = new byte[4096];
-                        int bytesRead;
-                        int bytesReceived = 0;
-
-                        while (bytesReceived < totalBytesOrId) {
-                            int bytesLeft = totalBytesOrId - bytesReceived;
-                            int toRead = Math.min(buffer.length, bytesLeft);
-
-                            bytesRead = dataInputStream.read(buffer, 0, toRead);
-                            if (bytesRead > 0) {
-                                baos.write(buffer, 0, bytesRead);
-                                bytesReceived += bytesRead;
-                            }
-                        }
-
-                        byte[] imageBytes = baos.toByteArray();
-                        screenShareListener.onCommandReceived(imageBytes);
+                        screenShareListener.onCommandReceived(bytesImage);
                     }
+
                 }catch (Exception e){
                     e.printStackTrace();
                 }
@@ -107,6 +119,30 @@ public class WebSocketClient {
         });
 
         service.shutdown();
+    }
+
+    private byte[] readBytes(DataInputStream dataInputStream) throws IOException{
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        byte[] buffer = new byte[4096];
+        int bytesRead;
+        int bytesReceived = 0;
+
+        dataInputStream.readInt(); // start code
+        final int totalBytes = dataInputStream.readInt();
+
+        while (bytesReceived < totalBytes) {
+            int bytesLeft = totalBytes - bytesReceived;
+            int toRead = Math.min(buffer.length, bytesLeft);
+
+            bytesRead = dataInputStream.read(buffer, 0, toRead);
+            if (bytesRead > 0) {
+                baos.write(buffer, 0, bytesRead);
+                bytesReceived += bytesRead;
+            }
+        }
+
+        dataInputStream.readInt(); // end code
+        return baos.toByteArray();
     }
 
     public void setDataListener(DataListener dataListener) {
@@ -120,23 +156,63 @@ public class WebSocketClient {
     }
 
     public void requestScreenInfo(){
-        SharedCommand command = new SharedCommand(SharedCommand.Type.SCREEN_INFO_REQUEST);
+        SharedCommand command = new SharedCommand(SharedCommand.Type.SCREEN_INFO_REQUEST,null);
         sendMessage(command);
     }
 
     public void requestScreenShare(){
-        SharedCommand command = new SharedCommand(SharedCommand.Type.SCREEN_SHARE_START_REQUEST);
+        SharedCommand command = new SharedCommand(SharedCommand.Type.SCREEN_SHARE_START_REQUEST,null);
         sendMessage(command);
     }
 
     public void stopScreenShare(){
-        SharedCommand command = new SharedCommand(SharedCommand.Type.SCREEN_SHARE_STOP_REQUEST);
+        SharedCommand command = new SharedCommand(SharedCommand.Type.SCREEN_SHARE_STOP_REQUEST,null);
         sendMessage(command);
+    }
+
+    public void shareClipText(String text) throws IOException {
+        final byte[] bytes = text.getBytes(StandardCharsets.UTF_8);
+        sendBytes(Type.CLIP_TEXT.id,bytes);
+    }
+
+    public void sendFile(String fileName, byte[] bytes) throws IOException{
+        final byte[] bytesName = fileName.getBytes(StandardCharsets.UTF_8);
+        sendBytes(Type.FILE.id, bytesName, bytes);
     }
 
     private void interpretCommand(String strCommand){
         SharedCommand command = gson.fromJson(strCommand, SharedCommand.class);
         if (dataListener != null) dataListener.onMessageReceived(command);
+    }
+
+    // order: BYTE_START_CODE SIZE [chunk1, chunk2, ...], BYTE_END_CODE
+    private void sendBytes(Integer id, byte[]... allBytes){
+        service.execute(() -> {
+            try{
+                if(id != null) { outputStream.writeInt(id); }
+
+                for(byte[] bytes : allBytes) {
+                    outputStream.writeInt(BYTE_START_CODE);
+
+                    final int totalBytes = bytes.length;
+                    outputStream.writeInt(totalBytes);
+
+                    int bytesSent = 0;
+
+                    while (bytesSent < totalBytes) {
+                        int bytesLeft = totalBytes - bytesSent;
+                        int toSend = Math.min(CHUNK_SIZE, bytesLeft);
+                        outputStream.write(bytes, bytesSent, toSend);
+                        bytesSent += toSend;
+                    }
+
+                    outputStream.writeInt(BYTE_END_CODE);
+                }
+                outputStream.flush();
+            }catch (IOException ignored){
+                outputStream = null;
+            }
+        });
     }
 
     public void sendMessage(SharedCommand command){
@@ -147,12 +223,24 @@ public class WebSocketClient {
                 String json = gson.toJson(command);
 
                 System.out.println("Sent data");
+                outputStream.writeInt(Type.SHARED_COMMAND.id);
                 outputStream.writeUTF(json);
                 System.out.println("Sent data done");
             }catch (IOException e){
                 e.printStackTrace();
             }
         });
+    }
+
+    enum Type{ // 5 digits
+        SCREEN_INFO(11111), SCREEN_SHARE(13571), CLIP_TEXT(55555),
+        SHARED_COMMAND(66666), FILE(77777);
+
+        final int id;
+
+        Type(int id) {
+            this.id = id;
+        }
     }
 
     public interface SocketListener{

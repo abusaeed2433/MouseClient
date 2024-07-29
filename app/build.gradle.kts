@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId = "com.unknownn.mouseclient"
-        minSdk = 24
+        minSdk = 29
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -60,4 +60,6 @@ dependencies {
 
     // for viewmodel
     implementation("androidx.fragment:fragment-ktx:1.6.2")
+
+    implementation("androidx.work:work-runtime-ktx:2.8.1")
 }

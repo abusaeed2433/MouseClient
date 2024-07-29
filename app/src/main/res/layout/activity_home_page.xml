@@ -7,4 +7,67 @@
     android:layout_height="match_parent"
     tools:context=".homepage.view.HomePage">
 
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/text_copied_in_pc"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tvCopiedTextInPC"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/little_round_back"
+        android:fontFamily="sans-serif"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:textIsSelectable="true"
+        android:padding="12dp"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/textView"
+        app:layout_constraintTop_toBottomOf="@+id/textView"
+        tools:text="The name of our country is Bangladesh" />
+
+
+    <TextView
+        android:id="@+id/textViewFileTemp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        app:layout_constraintVertical_bias="0.36"
+        android:text="@string/files_copied_in_pc"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvCopiedTextInPC" />
+
+    <TextView
+        android:id="@+id/tvFilesName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/little_round_back"
+        android:fontFamily="sans-serif"
+        android:padding="12dp"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toStartOf="@+id/ivDownload"
+        app:layout_constraintStart_toStartOf="@+id/textView"
+        app:layout_constraintTop_toBottomOf="@+id/textViewFileTemp"
+        tools:text="abc.png\n cda.pdf" />
+
+    <ImageView
+        android:id="@+id/ivDownload"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minHeight="0dp"
+        android:contentDescription="@string/download"
+        android:src="@drawable/baseline_download_24"
+        app:layout_constraintBottom_toBottomOf="@+id/tvFilesName"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textViewFileTemp"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
