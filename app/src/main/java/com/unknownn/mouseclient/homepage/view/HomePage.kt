@@ -32,7 +32,6 @@ class HomePage : AppCompatActivity() {
         setContentView(binding.root)
 
         processPassedData()
-        startMyService()
         setClickListener()
         addObserver()
     }
@@ -46,14 +45,6 @@ class HomePage : AppCompatActivity() {
         binding.buttonExit.setOnClickListener{
             stopService( Intent(this, MyForeGroundService::class.java) )
         }
-    }
-
-    private fun startMyService(){
-        Handler(Looper.getMainLooper()).postDelayed({
-            val intent=Intent(this,MyForeGroundService::class.java)
-            intent.putExtra("name","Geek for Geeks")
-            startService(intent)
-        },5000)
     }
 
     private fun processPassedData() {

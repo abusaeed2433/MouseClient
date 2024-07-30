@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
         initRV();
         observeViewModel();
         setClickListener();
-        checkShareRequest();
+        goToHomeIfPossible();
     }
 
     private IpAdapter adapter = null;
@@ -69,26 +69,24 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void checkShareRequest() {
-        if(MainActivity.socketClient == null) return;
+    private void goToHomeIfPossible() {
+        if(MainActivity.socketClient == null || !MainActivity.socketClient.isSocketRunning()) return; // service is not running
 
         final Intent intent = getIntent();
         final Intent myIntent = new Intent(this, HomePage.class);
 
         if (Objects.equals(intent.getAction(), Intent.ACTION_SEND) && Objects.equals(intent.getType(), "text/plain")) {
             String text = intent.getStringExtra(Intent.EXTRA_TEXT);
-            if(text == null) return;
-
             myIntent.putExtra("text",text);
         }
         else {
             Bundle bundle = intent.getExtras();
-            if (bundle == null) return;
-
-            Uri dataUri = (Uri) bundle.get(Intent.EXTRA_STREAM);
-            if(dataUri == null) return;
-
-            myIntent.putExtra("data_uri", dataUri.toString());
+            if (bundle != null) {
+                Uri dataUri = (Uri) bundle.get(Intent.EXTRA_STREAM);
+                if (dataUri != null) {
+                    myIntent.putExtra("data_uri", dataUri.toString());
+                }
+            }
         }
 
         startActivity(myIntent);
