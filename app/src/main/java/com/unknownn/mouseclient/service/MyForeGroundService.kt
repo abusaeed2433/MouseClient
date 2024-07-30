@@ -64,7 +64,7 @@ class MyForeGroundService:Service() {
 
         var prevPercent = 0
 
-        MainActivity.socketClient.setServiceListener(object: ServiceListener{
+        MainActivity.socketClient.addServiceListener(object: ServiceListener{
             override fun onConnected() {
                 NotificationsHelper.updateNotification(
                     this@MyForeGroundService,
@@ -96,6 +96,7 @@ class MyForeGroundService:Service() {
             override fun onFileStarted(fileName: String) {
                 NotificationsHelper.updateNotification(
                     this@MyForeGroundService,
+                    title = fileName,
                     message = "Started receiving $fileName"
                 )
             }
@@ -117,17 +118,18 @@ class MyForeGroundService:Service() {
                 if(curTime - prevTime > 1000L){ // increase index since > 1s
                     startIndex = (startIndex+1) % timeArr.size
                     endIndex = (endIndex+1) % timeArr.size
+                    prevTime = curTime
                 }
 
-                prevTime = curTime
                 timeArr[endIndex] = byteReceived
 
-                if(percent - prevPercent < 1) return
-                println("Updating notification")
+                if(percent - prevPercent < 3) return
                 prevPercent = percent
 
                 val receivedIn5S = (timeArr[endIndex] - timeArr[startIndex])
                 val speed = if(receivedIn5S > 0) (receivedIn5S / 5) else 1
+
+                println("Updating notification, received: ${receivedIn5S}, ${timeArr.contentToString()}")
 
                 val timeNeeded = (totalBytes - byteReceived) / speed
                 val timeStr = formatTime(timeNeeded)
@@ -151,7 +153,7 @@ class MyForeGroundService:Service() {
                 NotificationsHelper.updateNotification(
                     this@MyForeGroundService,
                     title = "Running",
-                    message = "File received to Downloads folder"
+                    message = "File saved to Downloads folder"
                 )
             }
 

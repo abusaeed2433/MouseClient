@@ -47,28 +47,18 @@
         app:layout_constraintTop_toBottomOf="@+id/tvCopiedTextInPC" />
 
     <TextView
-        android:id="@+id/tvFilesName"
+        android:id="@+id/tvTranferInfo"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
         android:background="@drawable/little_round_back"
         android:fontFamily="sans-serif"
         android:padding="12dp"
         android:textSize="14sp"
-        app:layout_constraintEnd_toStartOf="@+id/ivDownload"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@+id/textView"
         app:layout_constraintTop_toBottomOf="@+id/textViewFileTemp"
         tools:text="abc.png\n cda.pdf" />
-
-    <ImageView
-        android:id="@+id/ivDownload"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:minHeight="0dp"
-        android:contentDescription="@string/download"
-        android:src="@drawable/baseline_download_24"
-        app:layout_constraintBottom_toBottomOf="@+id/tvFilesName"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textViewFileTemp"/>
 
     <android.widget.Button
         android:id="@+id/buttonExit"

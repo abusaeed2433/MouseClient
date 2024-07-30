@@ -1,5 +1,9 @@
 package com.unknownn.mouseclient.classes
 
+import android.content.ContentValues
+import android.net.Uri
+import android.os.Environment
+import android.provider.MediaStore
 import com.google.gson.Gson
 import com.unknownn.mouseclient.main_activity.model.ServiceListener
 import com.unknownn.mouseclient.mouse_controller.model.DataListener
@@ -28,7 +32,7 @@ class WebSocketClient private constructor(
     private var dataListener: DataListener? = null
     private var screenShareListener: ScreenShareListener? = null
     private var textAndFileListener: TextAndFileListener? = null
-    private var serviceListener: ServiceListener? = null
+    private val serviceListeners: MutableList<ServiceListener> = ArrayList()
 
     var isSocketRunning: Boolean = false
 
@@ -66,7 +70,7 @@ class WebSocketClient private constructor(
                         Type.CLIP_TEXT.id -> {
                             val bytes = readBytes(inputStream)
                             textAndFileListener?.onTextReceived(bytes)
-                            serviceListener?.onTextReceived( String(bytes, StandardCharsets.UTF_8) )
+                            for(lis in serviceListeners) lis.onTextReceived( String(bytes, StandardCharsets.UTF_8) )
                         }
                         Type.SCREEN_INFO.id -> {
                             val bytes = readBytes(inputStream)
@@ -88,7 +92,7 @@ class WebSocketClient private constructor(
                             val height = h.toInt()
 
                             screenShareListener?.onScreenSizeReceived(width, height)
-                            serviceListener?.onMessage("Received screen size")
+                            for(lis in serviceListeners) lis.onMessage("Received screen size")
                         }
                         Type.SCREEN_SHARE.id -> {
                             val bytesImage = readBytes(inputStream)
@@ -96,12 +100,12 @@ class WebSocketClient private constructor(
                         }
                         Type.FILE.id -> {
                             val bytesName = readBytes(inputStream)
-                            serviceListener?.onFileStarted( String(bytesName, StandardCharsets.UTF_8) )
+                            val name = String(bytesName, StandardCharsets.UTF_8)
+                            for(lis in serviceListeners) lis.onFileStarted(name)
+                            textAndFileListener?.onFileNameReceived(name)
 
-                            val bytesContent = readBytes(inputStream, showFileProgress = true) // file progress here
-
-                            textAndFileListener?.onFileReceived(bytesName, bytesContent)
-                            serviceListener?.onFileReceived()
+                            readBytes(inputStream, isReceivingFile = true) // file progress here
+                            for(lis in serviceListeners) lis.onFileReceived()
                         }
                     }
                 } catch (e: Exception) {
@@ -112,8 +116,9 @@ class WebSocketClient private constructor(
         service.shutdown()
     }
 
+
     @Throws(IOException::class)
-    private fun readBytes(dataInputStream: DataInputStream?, showFileProgress:Boolean = false): ByteArray {
+    private fun readBytes(dataInputStream: DataInputStream?, isReceivingFile:Boolean = false): ByteArray {
         val baos = ByteArrayOutputStream()
         val buffer = ByteArray(4096)
         var bytesRead: Int
@@ -122,7 +127,7 @@ class WebSocketClient private constructor(
         dataInputStream!!.readInt() // start code
         val totalBytes = dataInputStream.readInt()
 
-        if(showFileProgress) serviceListener?.onFileSizeReceived(totalBytes)
+        if(isReceivingFile) for(lis in serviceListeners) lis.onFileSizeReceived(totalBytes)
 
         while (bytesReceived < totalBytes) {
             val bytesLeft = totalBytes - bytesReceived
@@ -134,12 +139,22 @@ class WebSocketClient private constructor(
                 bytesReceived += bytesRead
             }
 
-            if(showFileProgress) serviceListener?.onFileProgressChanged(bytesReceived)
+            if(isReceivingFile) {
+                for(lis in serviceListeners) lis.onFileProgressChanged(bytesReceived)
+
+                if(baos.size() > 4L*1024*1024){ // >= 4MB
+                    textAndFileListener?.onFilePartReceived(baos.toByteArray())
+                    baos.reset()
+                }
+            }
+
         }
+
+        if(isReceivingFile) textAndFileListener?.onFileCompleted(baos.toByteArray())
 
         dataInputStream.readInt() // end code
         println("File end reached")
-        if(showFileProgress) serviceListener?.onFileReceived()
+        if(isReceivingFile) for(lis in serviceListeners) lis.onFileReceived()
         return baos.toByteArray()
     }
 
@@ -155,9 +170,13 @@ class WebSocketClient private constructor(
         this.textAndFileListener = textAndFileListener
     }
 
-    fun setServiceListener(serviceListener: ServiceListener) {
-        this.serviceListener = serviceListener
+    fun removeServiceListener(serviceListener: ServiceListener) {
+        this.serviceListeners.remove(serviceListener)
     }
+    fun addServiceListener(serviceListener: ServiceListener) {
+        this.serviceListeners.add(serviceListener)
+    }
+
 
     fun clearScreenShareListener() {
         this.screenShareListener = null
@@ -264,7 +283,9 @@ class WebSocketClient private constructor(
 
     interface TextAndFileListener {
         fun onTextReceived(bytes: ByteArray)
-        fun onFileReceived(bytesName: ByteArray, bytesContent: ByteArray)
+        fun onFileNameReceived(nameWithExtension:String)
+        fun onFilePartReceived(bytesContent: ByteArray)
+        fun onFileCompleted(lastBytes: ByteArray)
     }
 
     companion object {

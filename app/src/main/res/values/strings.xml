@@ -6,6 +6,7 @@
     <string name="fps_ph">FPS:%$lf</string>
     <string name="action_type_values">action_type, values</string>
     <string name="action_type_values_ph">%1$s %2$f &amp; %3$f</string>
+    <string name="ph_only">%1$s</string>
     <string name="_192_168_0_104">192.168.0.104</string>
     <string name="received_256">Received: 256</string>
     <string name="enter_ip_of_server">Enter IP shown in pc</string>
